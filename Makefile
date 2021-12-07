@@ -5,7 +5,7 @@ default: game-app.exe
 
 game-app.exe:
 	$(GXX) -c ./Sources/*.cpp
-	$(GXX) *.o -o game-app $(LIB)
+	$(GXX) ./*.o -o game-app $(LIB)
 	rm *.o
 
 clear:
