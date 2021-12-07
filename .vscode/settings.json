@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "graphics.hpp": "c",
+        "system.hpp": "c",
+        "system_error": "cpp",
+        "vector": "cpp"
+    }
+}

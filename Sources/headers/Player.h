@@ -1,4 +1,4 @@
-#pragma once
+
 #include "../../SFML-2.5.1/include/SFML/Graphics.hpp"
 #include "../../SFML-2.5.1/include/SFML/System.hpp"
 #include "../../SFML-2.5.1/include/SFML/Window.hpp"
@@ -8,14 +8,14 @@ class Player
 {
 private:
     // Variables du joueur
-    std::vector<int, int> position;
-    int health;
-    int speed;
+    int x, y;
+    float health;
+    float speed;
+    sf::RectangleShape shape;
     // Sprites
     // Orientattion
 
     // Private functions
-    void initVariables();
 
 public:
     // Constructors and Destructors
@@ -24,8 +24,12 @@ public:
 
     // Functions
     void move(sf::Event);
+    void initVariables();
+    void initShape();
+    void updatePosition();
+    void renderPlayer();
 
     // Accessors
-    std::vector<int, int> getPosition();
+    std::vector<float, float> getPosition();
     void getOrientation();
 };

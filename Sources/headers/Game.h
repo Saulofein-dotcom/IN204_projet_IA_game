@@ -12,8 +12,12 @@ private:
     // Fenêtre
     RenderWindow *window;
 
+    // Variables
+    Player *player;
+
     // Fonctions privées
     void initWindow();
+    void initVariables();
 
 public:
     Game();
