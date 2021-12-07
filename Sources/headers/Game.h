@@ -9,17 +9,17 @@ using namespace sf;
 class Game
 {
 private:
-    //Fenêtre
-	RenderWindow* window;
+    // Fenêtre
+    RenderWindow *window;
 
-    //Fonctions privées
+    // Fonctions privées
     void initWindow();
 
 public:
     Game();
     ~Game();
 
-    //Fonctions
+    // Fonctions
     void run();
 
     void update();
