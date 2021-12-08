@@ -3,7 +3,7 @@
 
 int main()
 {
-	//srand(time(static_cast<unsigned>(0)));
+	srand(time(static_cast<unsigned>(0)));
 
 	Game game;
 

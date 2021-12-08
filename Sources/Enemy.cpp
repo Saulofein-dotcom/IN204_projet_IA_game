@@ -30,14 +30,35 @@ void Enemy::initSprite()
 
 // Constructors/Deconstructors
 
-Enemy::Enemy()
+Enemy::Enemy(float pos_x, float pos_y, float pos_x_center, float pos_y_center)
 {
     this->initVariables();
 	this->initTexture();
 	this->initSprite();
+    this->sprite.setPosition(pos_x, pos_y);
+    this->posXCenter = pos_x_center;
+    this->posYCenter = pos_y_center;
 }
 
 Enemy::~Enemy()
 {
     
+}
+
+/*-------------------------------------*/
+/*------------Accessors----------------*/
+/*-------------------------------------*/
+const FloatRect Enemy::getBounds() const
+{
+	return this->sprite.getGlobalBounds();
+}
+
+void Enemy::update()
+{
+    this->sprite.move(this->speed, 0.f);
+}
+
+void Enemy::render(RenderTarget* target)
+{
+	target->draw(this->sprite);
 }

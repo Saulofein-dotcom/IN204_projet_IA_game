@@ -12,11 +12,15 @@ class Enemy
 private:
     Sprite sprite;
 	Texture texture;
+
     float speed;
 	int hp;
 	int hpMax;
 	int damage;
 	int points;
+
+    float posXCenter;
+    float posYCenter;
 
     //Functions
     void initVariables();
@@ -25,8 +29,11 @@ private:
     void initSprite();
 
 public:
-    Enemy();
+    Enemy(float pos_x, float pos_y, float pos_x_center, float pos_y_center);
     ~Enemy();
+
+    //Accessors
+	const FloatRect getBounds() const;
 
     //Functions
 	void update();

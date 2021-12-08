@@ -20,11 +20,18 @@ void Game::initVariables()
 	this->player->initVariables();
 }
 
+void Game::initEnemies()
+{
+	this->spawnTimerMax = 50.f;
+	this->spawnTimer = this->spawnTimerMax;
+}
+
 Game::Game()
 {
 	this->initWindow();
 	this->initPlayer();
 	this->initVariables();
+	this->initEnemies();
 }
 
 Game::~Game()
@@ -46,6 +53,7 @@ void Game::update()
 {
 	this->updatePollEvents();
 	this->player->updatePosition();
+	this->updateEnemies();
 }
 
 void Game::updatePollEvents()
@@ -60,10 +68,49 @@ void Game::updatePollEvents()
 	}
 }
 
+void Game::updateEnemies()
+{
+	//Spawning enemies
+	this->spawnTimer += 0.5f;
+	if(this->spawnTimer > spawnTimerMax)
+	{
+		bool randomLateral = rand() % 2; // If randomLateral == 0, the enemy spawn on the left of the screen, otherwise on the right
+		bool randomVertical = rand() % 2; // If randomLateral == 0, the enemy spawn on the top of the screen, otherwise on the bottom
+		if(randomLateral==0 && randomVertical==0)
+		{
+
+		}else if(randomLateral==0 && randomVertical==1)
+		{
+
+		}else if(randomLateral==1 && randomVertical==0)
+		{
+
+		}else
+		{
+
+		}
+		this->enemies.push_back(new Enemy(10, 10, 10, 10));
+		this->spawnTimer = 0.f;
+	}
+
+	//Update position of enemies
+	for (auto *enemy : this->enemies)
+	{
+		enemy->update();
+	}
+
+}
+
 void Game::render()
 {
 	// Clear the screen
 	this->window->clear();
+	
+	//Draw enemies
+	for(auto *enemy : this->enemies)
+	{
+		enemy->render(this->window);
+	}
 
 	// Render
 	this->window->display();

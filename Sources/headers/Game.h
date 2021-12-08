@@ -24,6 +24,7 @@ private:
     void initWindow();
     void initPlayer();
     void initVariables();
+    void initEnemies();
 
 public:
     Game();
@@ -34,6 +35,7 @@ public:
 
     void update();
     void updatePollEvents();
+    void updateEnemies();
 
     void render();
 };
