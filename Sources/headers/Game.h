@@ -17,6 +17,7 @@ private:
 
     // Fonctions privées
     void initWindow();
+    void initPlayer();
     void initVariables();
 
 public:

@@ -5,9 +5,14 @@ void Game::initWindow()
 	/*
 	Set up the window, background, title, settings of the screen
 	*/
-	this->window = new RenderWindow(VideoMode(1080, 720), "Link Revenge", Style::Close | Style::Titlebar);
+	this->window = new RenderWindow(VideoMode(1300, 900), "Link Revenge", Style::Close | Style::Titlebar);
 	this->window->setFramerateLimit(60);
 	this->window->setVerticalSyncEnabled(false);
+}
+
+void Game::initPlayer()
+{
+	this->player = new Player();
 }
 
 void Game::initVariables()
@@ -18,6 +23,7 @@ void Game::initVariables()
 Game::Game()
 {
 	this->initWindow();
+	this->initPlayer();
 	this->initVariables();
 }
 
