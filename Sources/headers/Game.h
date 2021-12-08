@@ -1,5 +1,4 @@
-#ifndef GAME_H
-#define GAME_H
+#pragma once
 
 #include "Player.h"
 #include "../../SFML-2.5.1/include/SFML/Graphics.hpp"
@@ -32,4 +31,3 @@ public:
 
     void render();
 };
-#endif // !GAME_H
