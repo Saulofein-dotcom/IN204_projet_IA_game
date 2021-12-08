@@ -74,22 +74,35 @@ void Game::updateEnemies()
 	this->spawnTimer += 0.5f;
 	if(this->spawnTimer > spawnTimerMax)
 	{
-		bool randomLateral = rand() % 2; // If randomLateral == 0, the enemy spawn on the left of the screen, otherwise on the right
-		bool randomVertical = rand() % 2; // If randomLateral == 0, the enemy spawn on the top of the screen, otherwise on the bottom
-		if(randomLateral==0 && randomVertical==0)
+		int randomWindow = rand() % 4; // If randomLateral == 0, the enemy spawn on the left of the screen, otherwise on the right
+		float posX = 10.f;
+		float posY = 10.f;
+		if(randomWindow==0) //Left
 		{
-
-		}else if(randomLateral==0 && randomVertical==1)
+			posX = -100.f;
+			posY = static_cast<float>(rand() % this->window->getSize().y);
+		}
+		else if(randomWindow==1) //Top
 		{
-
-		}else if(randomLateral==1 && randomVertical==0)
+			posX = static_cast<float>(rand() % this->window->getSize().x);
+			posY = -100.f;
+		}
+		else if(randomWindow==2) //Right
 		{
-
-		}else
-		{
+			posX = this->window->getSize().x + 100.f;
+			posY = static_cast<float>(rand() % this->window->getSize().y);
 
 		}
-		this->enemies.push_back(new Enemy(10, 10, 10, 10));
+		else //Bottom
+		{
+			posX = static_cast<float>(rand() % this->window->getSize().x);
+			posY = this->window->getSize().y + 100.f;
+
+		}
+		float posXCenter = (float) this->window->getSize().x/4 + (rand() % this->window->getSize().x/2);
+		float posYCenter = (float) this->window->getSize().y/3 + (rand() % this->window->getSize().y/3);
+
+		this->enemies.push_back(new Enemy(posX, posY, posXCenter, posYCenter));
 		this->spawnTimer = 0.f;
 	}
 

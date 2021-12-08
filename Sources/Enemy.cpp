@@ -3,7 +3,7 @@
 void Enemy::initVariables()
 {
 
-	this->speed   = 10.f;
+	this->speed   = 2.f;
 	this->hpMax   = 15;
 	this->hp      = this->hpMax;
 	this->damage  = 1;
@@ -38,6 +38,10 @@ Enemy::Enemy(float pos_x, float pos_y, float pos_x_center, float pos_y_center)
     this->sprite.setPosition(pos_x, pos_y);
     this->posXCenter = pos_x_center;
     this->posYCenter = pos_y_center;
+
+	float norm = sqrt((this->posXCenter - pos_x) * (this->posXCenter - pos_x) + (this->posYCenter - pos_y) + (this->posYCenter - pos_y));
+	this->directionX = (this->posXCenter - pos_x)/norm;
+	this->directionY = (this->posYCenter - pos_y)/ norm;
 }
 
 Enemy::~Enemy()
@@ -55,7 +59,8 @@ const FloatRect Enemy::getBounds() const
 
 void Enemy::update()
 {
-    this->sprite.move(this->speed, 0.f);
+    this->sprite.move(this->speed * this->directionX, this->speed * this->directionY);
+	std::cout << "Enemy is x : " << this->getBounds().left << ", y : " << this->getBounds().top << "\n";
 }
 
 void Enemy::render(RenderTarget* target)

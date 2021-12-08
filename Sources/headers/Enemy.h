@@ -4,6 +4,7 @@
 #include "../../SFML-2.5.1/include/SFML/Window.hpp"
 #include <vector>
 #include <iostream>
+#include <math.h>
 
 using namespace sf;
 
@@ -21,6 +22,9 @@ private:
 
     float posXCenter;
     float posYCenter;
+
+    float directionX;
+    float directionY;
 
     //Functions
     void initVariables();
