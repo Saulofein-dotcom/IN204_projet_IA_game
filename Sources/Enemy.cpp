@@ -3,7 +3,7 @@
 void Enemy::initVariables()
 {
 
-	this->speed   = 3.f;
+	this->speed   = 6.f;
 	this->hpMax   = 15;
 	this->hp      = this->hpMax;
 	this->damage  = 1;
