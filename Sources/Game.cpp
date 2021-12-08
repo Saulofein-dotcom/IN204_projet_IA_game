@@ -107,10 +107,29 @@ void Game::updateEnemies()
 	}
 
 	//Update position of enemies
+	unsigned counter = 0;
 	for (auto *enemy : this->enemies)
 	{
 		enemy->update();
+
+		if(enemy->getBounds().top > this->window->getSize().y + 120.f || 
+		enemy->getBounds().top < -120.f ||
+		enemy->getBounds().left < -120.f ||
+		enemy->getBounds().left > this->window->getSize().x + 120.f)
+		{
+			delete this->enemies.at(counter);
+			this->enemies.erase(this->enemies.begin() + counter);
+			counter = counter - 1;
+
+			std::cout << "Nombre d'ennemies : " << this->enemies.size() << "\n";
+		}
+
+		counter = counter + 1;
+
+		
 	}
+
+	
 
 }
 
