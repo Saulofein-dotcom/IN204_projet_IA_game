@@ -13,6 +13,7 @@ class Enemy
 private:
     Sprite sprite;
 	Texture texture;
+    Clock animationTimer;
 
     float speed;
 	int hp;
@@ -26,10 +27,14 @@ private:
     float directionX;
     float directionY;
 
+    //Animation
+    IntRect currentFrame;
+
     //Functions
     void initVariables();
     void initShape();
     void initTexture();
+    void initAnimation();
     void initSprite();
 
 public:
@@ -40,6 +45,7 @@ public:
 	const FloatRect getBounds() const;
 
     //Functions
+    void updateAnimation();
 	void update();
 	void render(RenderTarget* target);
 
