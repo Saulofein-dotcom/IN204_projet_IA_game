@@ -15,7 +15,6 @@ void Game::initWorld()
 	if (!this->worldBackgroundTexture.loadFromFile("Textures/background.png"))
 		std::cout << "ERROR::GAME::Failed to load background texture \n";
 	this->worldBackground.setTexture(this->worldBackgroundTexture);
-	this->worldBackground.setScale(3.7f,3.7f);
 }
 
 void Game::initPlayer()
