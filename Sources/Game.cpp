@@ -10,6 +10,14 @@ void Game::initWindow()
 	this->window->setVerticalSyncEnabled(false);
 }
 
+void Game::initWorld()
+{
+	if (!this->worldBackgroundTexture.loadFromFile("Textures/background.png"))
+		std::cout << "ERROR::GAME::Failed to load background texture \n";
+	this->worldBackground.setTexture(this->worldBackgroundTexture);
+	this->worldBackground.setScale(3.7f,3.7f);
+}
+
 void Game::initPlayer()
 {
 	this->player = new Player();
@@ -29,6 +37,7 @@ void Game::initEnemies()
 Game::Game()
 {
 	this->initWindow();
+	this->initWorld();
 	this->initPlayer();
 	this->initVariables();
 	this->initEnemies();
@@ -38,6 +47,12 @@ Game::~Game()
 {
 	delete this->window;
 	delete this->player;
+
+	//Delete enemies
+	for (auto *i : this->enemies)
+	{
+		delete i;
+	}
 }
 
 void Game::run()
@@ -133,10 +148,18 @@ void Game::updateEnemies()
 
 }
 
+void Game::renderWorld()
+{
+	this->window->draw(this->worldBackground);
+}
+
 void Game::render()
 {
 	// Clear the screen
 	this->window->clear();
+
+	//Draw background
+	this->renderWorld();
 	
 	//Draw enemies
 	for(auto *enemy : this->enemies)

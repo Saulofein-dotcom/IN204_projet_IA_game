@@ -13,7 +13,8 @@ void Enemy::initVariables()
 void Enemy::initTexture()
 {
 	//Load a texture from file
-	if (!this->texture.loadFromFile("Textures/Enemy.png"))
+	this->texture = new Texture();
+	if (!this->texture->loadFromFile("Textures/Enemy.png"))
 	{
 		std::cout << "ERROR::PLAYER::INITTEXTURE::Coul not load texture from file \n";
 	}
@@ -27,7 +28,7 @@ void Enemy::initAnimation()
 void Enemy::initSprite()
 {
 	//Set texture to sprite
-	this->sprite.setTexture(this->texture);
+	this->sprite.setTexture(*this->texture);
 
 	this->currentFrame = IntRect(0,0,16,16);
 
@@ -56,7 +57,7 @@ Enemy::Enemy(float pos_x, float pos_y, float pos_x_center, float pos_y_center)
 
 Enemy::~Enemy()
 {
-    
+    delete this->texture;
 }
 
 /*-------------------------------------*/

@@ -12,7 +12,7 @@ class Enemy
 {
 private:
     Sprite sprite;
-	Texture texture;
+	Texture* texture;
     Clock animationTimer;
 
     float speed;

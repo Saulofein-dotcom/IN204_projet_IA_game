@@ -12,6 +12,10 @@ private:
     // Fenêtre
     RenderWindow *window;
 
+    //World
+	Texture worldBackgroundTexture;
+	Sprite worldBackground;
+
     // Variables
     Player *player;
 
@@ -22,6 +26,7 @@ private:
 
     // Fonctions privées
     void initWindow();
+    void initWorld();
     void initPlayer();
     void initVariables();
     void initEnemies();
@@ -38,4 +43,5 @@ public:
     void updateEnemies();
 
     void render();
+    void renderWorld();
 };
