@@ -75,7 +75,7 @@ const FloatRect Enemy::getBounds() const
 /*-------------------------------------*/
 void Enemy::updateAnimation()
 {
-	if(this->animationTimer.getElapsedTime().asSeconds() >= 1.f)
+	if(this->animationTimer.getElapsedTime().asSeconds() >= 0.15f)
 	{
 		this->currentFrame.left = (this->currentFrame.left + 16) % 64;	
 		this->animationTimer.restart();

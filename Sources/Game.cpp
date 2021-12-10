@@ -29,7 +29,7 @@ void Game::initVariables()
 
 void Game::initEnemies()
 {
-	this->spawnTimerMax = 20.f;
+	this->spawnTimerMax = 5.f;
 	this->spawnTimer = this->spawnTimerMax;
 }
 
