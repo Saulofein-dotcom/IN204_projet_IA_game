@@ -15,6 +15,11 @@ class EnemyRock
 protected:
     Sprite sprite;
 	Texture* texture;
+
+    Sprite spriteShadow;
+    Texture* textureShadow;
+    Clock animationTimerShadow;
+
     Clock animationTimer;
 
     float speed;
@@ -22,10 +27,9 @@ protected:
     float posXExplode;
     float posYExplode;
 
-
-    
     //Animation
     IntRect currentFrame;
+    IntRect currentFrameShadow;
 
     //Functions
     void initVariables();

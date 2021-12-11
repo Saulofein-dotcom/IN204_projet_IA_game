@@ -133,7 +133,10 @@ void Game::updateEnemies()
 
 	if(this->spawnTimerRock > this->spawnTimerMaxRock)
 	{
-		this->enemiesRock.push_back(new EnemyRock((rand() % this->window->getSize().x) - 150, - 400, (rand() % this->window->getSize().x) - 150, (rand() % this->window->getSize().y) - 50));
+		int pos_x = (rand() % (this->window->getSize().x  - 150));
+		int pos_y_explode = (rand() % (this->window->getSize().y - 150)); 
+		int pos_y = pos_y_explode - this->window->getSize().y;
+		this->enemiesRock.push_back(new EnemyRock(pos_x, pos_y, pos_x, pos_y_explode));
 		this->spawnTimerRock = 0.f;
 	}
 
@@ -152,7 +155,7 @@ void Game::updateEnemies()
 			this->enemies.erase(this->enemies.begin() + counter);
 			counter = counter - 1;
 
-			std::cout << "Nombre d'ennemies : " << this->enemies.size() << "\n";
+			//std::cout << "Nombre d'ennemies : " << this->enemies.size() << "\n";
 		}
 
 		counter = counter + 1;
@@ -192,15 +195,17 @@ void Game::render()
 	this->renderWorld();
 	
 	//Draw enemies
+	for(auto *enemy : this->enemiesRock)
+	{
+		enemy->render(this->window);
+	}
+
 	for(auto *enemy : this->enemies)
 	{
 		enemy->render(this->window);
 	}
 
-	for(auto *enemy : this->enemiesRock)
-	{
-		enemy->render(this->window);
-	}
+	
 
 	// Render
 	this->window->display();

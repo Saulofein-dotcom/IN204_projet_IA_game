@@ -3,7 +3,7 @@
 void EnemyRock::initVariables()
 {
 
-	this->speed   = 5.f;
+	this->speed   = 6.f;
 }
 
 void EnemyRock::initTexture()
@@ -12,6 +12,12 @@ void EnemyRock::initTexture()
 	this->texture = new Texture();
 	if (!this->texture->loadFromFile("Textures/rock_air.png"))
 	{
+		std::cout << "ERROR::PLAYER::INITTEXTURE::Could not load texture from file \n";
+	}
+
+	this->textureShadow = new Texture();
+	if (!this->textureShadow->loadFromFile("Textures/rockShadow.png"))
+	{
 		std::cout << "ERROR::PLAYER::INITTEXTURE::Coul not load texture from file \n";
 	}
 }
@@ -19,6 +25,7 @@ void EnemyRock::initTexture()
 void EnemyRock::initAnimation()
 {
 	this->animationTimer.restart();
+	this->animationTimerShadow.restart();
 }
 
 void EnemyRock::initSprite()
@@ -32,6 +39,16 @@ void EnemyRock::initSprite()
 
 	//Resize the Sprite
 	this->sprite.scale(1.f, 1.f);
+
+	//Set texture to sprite
+	this->spriteShadow.setTexture(*this->textureShadow);
+
+	this->currentFrameShadow = IntRect(0,0,150,48);
+
+	this->spriteShadow.setTextureRect(this->currentFrameShadow);
+
+	//Resize the Sprite
+	this->spriteShadow.scale(1.f, 1.f);
 }
 
 EnemyRock::EnemyRock(float pos_x, float pos_y, float pos_x_explode, float pos_y_explode)
@@ -40,14 +57,16 @@ EnemyRock::EnemyRock(float pos_x, float pos_y, float pos_x_explode, float pos_y_
 	this->initTexture();
 	this->initAnimation();
 	this->initSprite();
-    this->sprite.setPosition(pos_x, pos_y);
 	this->posXExplode = pos_x_explode;
 	this->posYExplode = pos_y_explode;
+	this->spriteShadow.setPosition(this->posXExplode, this->posYExplode + 120);
+    this->sprite.setPosition(pos_x, pos_y);
 
 }
 
 EnemyRock::~EnemyRock()
 {
+	delete this->textureShadow;
     delete this->texture;
 }
 
@@ -83,10 +102,21 @@ void EnemyRock::updateAnimation()
 		this->animationTimer.restart();
 	}
 	this->sprite.setTextureRect(this->currentFrame);
+
+	if(this->animationTimerShadow.getElapsedTime().asSeconds() >= 0.2f && this->currentFrameShadow.left < 750)
+	{
+		this->currentFrameShadow.left = (this->currentFrameShadow.left + 150);	
+		this->animationTimerShadow.restart();
+	}
+
+	if(this->currentFrameShadow.left >= 900) this->animationTimerShadow.restart();
+
+	this->spriteShadow.setTextureRect(this->currentFrameShadow);
 }
 
 void EnemyRock::render(RenderTarget* target)
 {
 	target->draw(this->sprite);
+	target->draw(this->spriteShadow);
 }
 
