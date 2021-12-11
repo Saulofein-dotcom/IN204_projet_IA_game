@@ -129,7 +129,7 @@ void EnemyRock::updateAnimation()
 	else if(this->exploded && this->currentFrame.left < 1050 && this->animationTimer.getElapsedTime().asSeconds() >= 0.06f)
 	{
 		this->currentFrame.left = (this->currentFrame.left + 150);
-		this->currentFrameShadow.left > 0 ? this->currentFrameShadow.left = this->currentFrameShadow.left - 150 : this->currentFrameShadow.left = 0;
+		this->currentFrameShadow.left > 150 ? this->currentFrameShadow.left = this->currentFrameShadow.left - 300 : this->currentFrameShadow.left = 0;
 		this->animationTimer.restart();
 	}
 
