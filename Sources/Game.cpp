@@ -31,6 +31,9 @@ void Game::initEnemies()
 {
 	this->spawnTimerMax = 5.f;
 	this->spawnTimer = this->spawnTimerMax;
+
+	this->spawnTimerMaxRock = 50.f;
+	this->spawnTimerRock = this->spawnTimerMaxRock;
 }
 
 Game::Game()
@@ -40,6 +43,7 @@ Game::Game()
 	this->initPlayer();
 	this->initVariables();
 	this->initEnemies();
+
 }
 
 Game::~Game()
@@ -49,6 +53,11 @@ Game::~Game()
 
 	//Delete enemies
 	for (auto *i : this->enemies)
+	{
+		delete i;
+	}
+
+	for (auto *i : this->enemiesRock)
 	{
 		delete i;
 	}
@@ -86,6 +95,8 @@ void Game::updateEnemies()
 {
 	//Spawning enemies
 	this->spawnTimer += 0.5f;
+	this->spawnTimerRock += 0.5f;
+
 	if(this->spawnTimer > spawnTimerMax)
 	{
 		int randomWindow = rand() % 4; // If randomLateral == 0, the enemy spawn on the left of the screen, otherwise on the right
@@ -120,6 +131,12 @@ void Game::updateEnemies()
 		this->spawnTimer = 0.f;
 	}
 
+	if(this->spawnTimerRock > this->spawnTimerMaxRock)
+	{
+		this->enemiesRock.push_back(new EnemyRock((rand() % this->window->getSize().x) - 150, - 400, (rand() % this->window->getSize().x) - 150, (rand() % this->window->getSize().y) - 50));
+		this->spawnTimerRock = 0.f;
+	}
+
 	//Update position of enemies
 	unsigned counter = 0;
 	for (auto *enemy : this->enemies)
@@ -143,6 +160,20 @@ void Game::updateEnemies()
 		
 	}
 
+	counter = 0;
+	for (auto *enemy : this->enemiesRock)
+	{
+		enemy->update();
+		if(enemy->getBounds().top > enemy->getPosYExplode())
+		{
+			delete this->enemiesRock.at(counter);
+			this->enemiesRock.erase(this->enemiesRock.begin() + counter);
+			counter = counter - 1;
+		}
+
+		counter = counter + 1;
+	}
+
 	
 
 }
@@ -162,6 +193,11 @@ void Game::render()
 	
 	//Draw enemies
 	for(auto *enemy : this->enemies)
+	{
+		enemy->render(this->window);
+	}
+
+	for(auto *enemy : this->enemiesRock)
 	{
 		enemy->render(this->window);
 	}

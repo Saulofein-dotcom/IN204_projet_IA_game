@@ -2,6 +2,7 @@
 
 #include "Player.h"
 #include "Enemy.h"
+#include "EnemyRock.h"
 #include "../../SFML-2.5.1/include/SFML/Graphics.hpp"
 
 using namespace sf;
@@ -23,6 +24,10 @@ private:
 	float spawnTimer;
 	float spawnTimerMax;
 	std::vector<Enemy*> enemies;
+
+    float spawnTimerRock;
+    float spawnTimerMaxRock;
+    std::vector<EnemyRock*> enemiesRock;
 
     // Fonctions privées
     void initWindow();

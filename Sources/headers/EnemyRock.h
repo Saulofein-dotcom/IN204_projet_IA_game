@@ -2,13 +2,15 @@
 #include "../../SFML-2.5.1/include/SFML/Graphics.hpp"
 #include "../../SFML-2.5.1/include/SFML/System.hpp"
 #include "../../SFML-2.5.1/include/SFML/Window.hpp"
+#include "Enemy.h"
 #include <vector>
 #include <iostream>
 #include <math.h>
 
+
 using namespace sf;
 
-class Enemy
+class EnemyRock
 {
 protected:
     Sprite sprite;
@@ -17,12 +19,11 @@ protected:
 
     float speed;
 
-    float posXCenter;
-    float posYCenter;
+    float posXExplode;
+    float posYExplode;
 
-    float directionX;
-    float directionY;
 
+    
     //Animation
     IntRect currentFrame;
 
@@ -34,18 +35,19 @@ protected:
     void initSprite();
 
 public:
-    Enemy();
-    Enemy(float pos_x, float pos_y, float pos_x_center, float pos_y_center);
-    ~Enemy();
+    EnemyRock();
+    EnemyRock(float pos_x, float pos_y, float pos_x_explode, float pos_y_explode);
+    ~EnemyRock();
 
     //Accessors
 	const FloatRect getBounds() const;
-    
+    float getPosYExplode() const;
 
     //Functions
     void updateAnimation();
 	void update();
-	void render(RenderTarget* target);
+
+    void render(RenderTarget* target);
 
     
 

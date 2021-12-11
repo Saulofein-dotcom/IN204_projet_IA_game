@@ -4,10 +4,6 @@ void Enemy::initVariables()
 {
 
 	this->speed   = 5.f;
-	this->hpMax   = 15;
-	this->hp      = this->hpMax;
-	this->damage  = 1;
-	this->points  = 5;
 }
 
 void Enemy::initTexture()
@@ -53,6 +49,11 @@ Enemy::Enemy(float pos_x, float pos_y, float pos_x_center, float pos_y_center)
 	float norm = sqrt((this->posXCenter - pos_x) * (this->posXCenter - pos_x) + (this->posYCenter - pos_y) * (this->posYCenter - pos_y));
 	this->directionX = (this->posXCenter - pos_x)/norm;
 	this->directionY = (this->posYCenter - pos_y)/ norm;
+}
+
+Enemy::Enemy()
+{
+	
 }
 
 Enemy::~Enemy()
