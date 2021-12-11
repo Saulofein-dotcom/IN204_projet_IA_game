@@ -103,6 +103,15 @@ void EnemyRock::update()
 
 void EnemyRock::updateAnimation()
 {
+	if(this->animationTimerShadow.getElapsedTime().asSeconds() >= 0.2f && this->currentFrameShadow.left < 750 && !this->exploded)
+	{
+		this->currentFrameShadow.left = (this->currentFrameShadow.left + 150);	
+		this->animationTimerShadow.restart();
+	}
+	if(this->currentFrameShadow.left >= 900) this->animationTimerShadow.restart();
+	this->spriteShadow.setTextureRect(this->currentFrameShadow);
+
+
 	if(this->animationTimer.getElapsedTime().asSeconds() >= 1.f  && !this->exploded && this->getBounds().top < this->getPosYExplode())
 	{
 		this->currentFrame.left = (this->currentFrame.left + 150) % 450;	
@@ -120,6 +129,7 @@ void EnemyRock::updateAnimation()
 	else if(this->exploded && this->currentFrame.left < 1050 && this->animationTimer.getElapsedTime().asSeconds() >= 0.06f)
 	{
 		this->currentFrame.left = (this->currentFrame.left + 150);
+		this->currentFrameShadow.left > 0 ? this->currentFrameShadow.left = this->currentFrameShadow.left - 150 : this->currentFrameShadow.left = 0;
 		this->animationTimer.restart();
 	}
 
@@ -133,18 +143,12 @@ void EnemyRock::updateAnimation()
 
 
 
-	if(this->animationTimerShadow.getElapsedTime().asSeconds() >= 0.2f && this->currentFrameShadow.left < 750 && !this->exploded)
-	{
-		this->currentFrameShadow.left = (this->currentFrameShadow.left + 150);	
-		this->animationTimerShadow.restart();
-	}
-	if(this->currentFrameShadow.left >= 900) this->animationTimerShadow.restart();
-	this->spriteShadow.setTextureRect(this->currentFrameShadow);
+
 }
 
 void EnemyRock::render(RenderTarget* target)
 {
-	target->draw(this->sprite);
 	target->draw(this->spriteShadow);
+	target->draw(this->sprite);
 }
 
