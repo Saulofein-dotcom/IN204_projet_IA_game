@@ -167,7 +167,7 @@ void Game::updateEnemies()
 	for (auto *enemy : this->enemiesRock)
 	{
 		enemy->update();
-		if(enemy->getBounds().top > enemy->getPosYExplode())
+		if(enemy->isDestroyed())
 		{
 			delete this->enemiesRock.at(counter);
 			this->enemiesRock.erase(this->enemiesRock.begin() + counter);

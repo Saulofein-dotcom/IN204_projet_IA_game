@@ -27,6 +27,9 @@ protected:
     float posXExplode;
     float posYExplode;
 
+    bool exploded;
+    bool toDestroy;
+
     //Animation
     IntRect currentFrame;
     IntRect currentFrameShadow;
@@ -46,6 +49,7 @@ public:
     //Accessors
 	const FloatRect getBounds() const;
     float getPosYExplode() const;
+    bool isDestroyed() const;
 
     //Functions
     void updateAnimation();

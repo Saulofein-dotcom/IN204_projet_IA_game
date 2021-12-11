@@ -4,6 +4,8 @@ void EnemyRock::initVariables()
 {
 
 	this->speed   = 6.f;
+	this->exploded = false;
+	this->toDestroy = false;
 }
 
 void EnemyRock::initTexture()
@@ -82,13 +84,18 @@ float EnemyRock::getPosYExplode() const
 {
 	return this->posYExplode;
 }
+
+bool EnemyRock::isDestroyed() const
+{
+	return this->toDestroy;
+}
 /*-------------------------------------*/
 /*--------------Update-----------------*/
 /*-------------------------------------*/
 
 void EnemyRock::update()
 {
-    this->sprite.move(0, this->speed);
+    if(!this->exploded) this->sprite.move(0, this->speed);
 	//std::cout << "Enemy is x : " << this->getBounds().left << ", y : " << this->getBounds().top << "\n";
 	this->updateAnimation();
 }
@@ -96,21 +103,42 @@ void EnemyRock::update()
 
 void EnemyRock::updateAnimation()
 {
-	if(this->animationTimer.getElapsedTime().asSeconds() >= 1.f)
+	if(this->animationTimer.getElapsedTime().asSeconds() >= 1.f  && !this->exploded && this->getBounds().top < this->getPosYExplode())
 	{
 		this->currentFrame.left = (this->currentFrame.left + 150) % 450;	
 		this->animationTimer.restart();
 	}
+	
+
+	else if(this->getBounds().top >= this->getPosYExplode() && !this->exploded) 
+	{
+		exploded = true;
+		this->currentFrame.top = 150;
+		this->currentFrame.left = 0;
+		this->animationTimer.restart();
+	}
+	else if(this->exploded && this->currentFrame.left < 1050 && this->animationTimer.getElapsedTime().asSeconds() >= 0.06f)
+	{
+		this->currentFrame.left = (this->currentFrame.left + 150);
+		this->animationTimer.restart();
+	}
+
+	else if(this->exploded && this->currentFrame.left >= 1050) 
+	{
+		this->toDestroy = true;
+	}
 	this->sprite.setTextureRect(this->currentFrame);
 
-	if(this->animationTimerShadow.getElapsedTime().asSeconds() >= 0.2f && this->currentFrameShadow.left < 750)
+
+
+
+
+	if(this->animationTimerShadow.getElapsedTime().asSeconds() >= 0.2f && this->currentFrameShadow.left < 750 && !this->exploded)
 	{
 		this->currentFrameShadow.left = (this->currentFrameShadow.left + 150);	
 		this->animationTimerShadow.restart();
 	}
-
 	if(this->currentFrameShadow.left >= 900) this->animationTimerShadow.restart();
-
 	this->spriteShadow.setTextureRect(this->currentFrameShadow);
 }
 
