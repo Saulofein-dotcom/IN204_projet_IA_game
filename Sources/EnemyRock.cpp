@@ -1,5 +1,6 @@
 #include "./headers/EnemyRock.h"
 
+
 void EnemyRock::initVariables()
 {
 
@@ -96,8 +97,9 @@ bool EnemyRock::isDestroyed() const
 
 void EnemyRock::update()
 {
+
     if(!this->exploded) this->sprite.move(0, this->speed);
-	if(this->sprite.getPosition().y + 100 > this->getPosYExplode()) std::cout << "Aie";
+	if(this->sprite.getPosition().y + 80 > this->getPosYExplode()) isDangerous = true;
 	//std::cout << "Enemy is x : " << this->getBounds().left << ", y : " << this->getBounds().top << "\n";
 	this->updateAnimation();
 }
