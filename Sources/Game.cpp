@@ -12,6 +12,9 @@ void Game::initWindow()
 
 void Game::initWorld()
 {
+	/*
+	Set up the background texture
+	*/
 	if (!this->worldBackgroundTexture.loadFromFile("Textures/background.png"))
 		std::cout << "ERROR::GAME::Failed to load background texture \n";
 	this->worldBackground.setTexture(this->worldBackgroundTexture);
@@ -19,11 +22,17 @@ void Game::initWorld()
 
 void Game::initPlayer()
 {
+	/*
+	Set up the player
+	*/
 	this->player = new Player();
 }
 
 void Game::initEnemies()
 {
+	/*
+	Initialize variables of the enemies
+	*/
 	this->spawnTimerMax = 25.f;
 	this->spawnTimer = this->spawnTimerMax;
 
@@ -41,15 +50,14 @@ Game::Game()
 
 Game::~Game()
 {
-	delete this->window;
-	delete this->player;
+	delete this->window; // Delete window
+	delete this->player; // Delete player
 
 	// Delete enemies
 	for (auto *i : this->enemies)
 	{
 		delete i;
 	}
-
 	for (auto *i : this->enemiesRock)
 	{
 		delete i;

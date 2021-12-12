@@ -29,6 +29,7 @@ protected:
 
     bool exploded;
     bool toDestroy;
+    bool isDangerous;
 
     //Animation
     IntRect currentFrame;

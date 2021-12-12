@@ -1,15 +1,7 @@
 #include "./headers/Player.h"
 
-void Player::initShape()
-{
-    this->shape.setFillColor(sf::Color::Green);
-    this->shape.setSize(sf::Vector2f(100.f, 100.f));
-    this->shape.setPosition(sf::Vector2f(100.f, 100.f));
-}
-
 void Player::initVariables()
 {
-    this->health = 100.f;   // vie du joueur
     this->moveSpeed = 10.f; // nombre de pixels parcoururs par appui sur une touche
 }
 
