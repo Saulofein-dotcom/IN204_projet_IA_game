@@ -13,27 +13,26 @@ private:
     // Fenêtre
     RenderWindow *window;
 
-    //World
-	Texture worldBackgroundTexture;
-	Sprite worldBackground;
+    // World
+    Texture worldBackgroundTexture;
+    Sprite worldBackground;
 
-    // Variables
+    // Player
     Player *player;
 
-    //Enemies
-	float spawnTimer;
-	float spawnTimerMax;
-	std::vector<Enemy*> enemies;
+    // Enemies
+    float spawnTimer;
+    float spawnTimerMax;
+    std::vector<Enemy *> enemies;
 
     float spawnTimerRock;
     float spawnTimerMaxRock;
-    std::vector<EnemyRock*> enemiesRock;
+    std::vector<EnemyRock *> enemiesRock;
 
     // Fonctions privées
     void initWindow();
     void initWorld();
     void initPlayer();
-    void initVariables();
     void initEnemies();
 
 public:

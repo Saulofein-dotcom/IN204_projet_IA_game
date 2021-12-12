@@ -22,11 +22,6 @@ void Game::initPlayer()
 	this->player = new Player();
 }
 
-void Game::initVariables()
-{
-	this->player->initVariables();
-}
-
 void Game::initEnemies()
 {
 	this->spawnTimerMax = 25.f;
@@ -41,9 +36,7 @@ Game::Game()
 	this->initWindow();
 	this->initWorld();
 	this->initPlayer();
-	this->initVariables();
 	this->initEnemies();
-
 }
 
 Game::~Game()
@@ -51,7 +44,7 @@ Game::~Game()
 	delete this->window;
 	delete this->player;
 
-	//Delete enemies
+	// Delete enemies
 	for (auto *i : this->enemies)
 	{
 		delete i;
@@ -75,7 +68,7 @@ void Game::run()
 void Game::update()
 {
 	this->updatePollEvents();
-	this->player->updatePosition();
+	this->player->update();
 	this->updateEnemies();
 }
 
@@ -93,81 +86,77 @@ void Game::updatePollEvents()
 
 void Game::updateEnemies()
 {
-	//Spawning enemies
+	// Spawning enemies
 	this->spawnTimer += 0.5f;
 	this->spawnTimerRock += 0.5f;
 
-	if(this->spawnTimer > spawnTimerMax)
+	if (this->spawnTimer > spawnTimerMax)
 	{
 		int randomWindow = rand() % 4; // If randomLateral == 0, the enemy spawn on the left of the screen, otherwise on the right
 		float posX = 10.f;
 		float posY = 10.f;
-		if(randomWindow==0) //Left
+		if (randomWindow == 0) // Left
 		{
 			posX = -100.f;
 			posY = static_cast<float>(rand() % this->window->getSize().y);
 		}
-		else if(randomWindow==1) //Top
+		else if (randomWindow == 1) // Top
 		{
 			posX = static_cast<float>(rand() % this->window->getSize().x);
 			posY = -100.f;
 		}
-		else if(randomWindow==2) //Right
+		else if (randomWindow == 2) // Right
 		{
 			posX = this->window->getSize().x + 100.f;
 			posY = static_cast<float>(rand() % this->window->getSize().y);
-
 		}
-		else //Bottom
+		else // Bottom
 		{
 			posX = static_cast<float>(rand() % this->window->getSize().x);
 			posY = this->window->getSize().y + 100.f;
-
 		}
-		float posXCenter = (float) this->window->getSize().x/4 + (rand() % this->window->getSize().x/2);
-		float posYCenter = (float) this->window->getSize().y/3 + (rand() % this->window->getSize().y/3);
+		float posXCenter = (float)this->window->getSize().x / 4 + (rand() % this->window->getSize().x / 2);
+		float posYCenter = (float)this->window->getSize().y / 3 + (rand() % this->window->getSize().y / 3);
 
 		this->enemies.push_back(new Enemy(posX, posY, posXCenter, posYCenter));
 		this->spawnTimer = 0.f;
 	}
 
-	if(this->spawnTimerRock > this->spawnTimerMaxRock)
+	if (this->spawnTimerRock > this->spawnTimerMaxRock)
 	{
-		int pos_x = (rand() % (this->window->getSize().x  - 150));
-		int pos_y_explode = (rand() % (this->window->getSize().y - 150)); 
+		int pos_x = (rand() % (this->window->getSize().x - 150));
+		int pos_y_explode = (rand() % (this->window->getSize().y - 150));
 		int pos_y = pos_y_explode - this->window->getSize().y;
 		this->enemiesRock.push_back(new EnemyRock(pos_x, pos_y, pos_x, pos_y_explode));
 		this->spawnTimerRock = 0.f;
 	}
 
-	//Update position of enemies
+	// Update position of enemies
 	unsigned counter = 0;
 	for (auto *enemy : this->enemies)
 	{
 		enemy->update();
 
-		if(enemy->getBounds().top > this->window->getSize().y + 120.f || 
-		enemy->getBounds().top < -120.f ||
-		enemy->getBounds().left < -120.f ||
-		enemy->getBounds().left > this->window->getSize().x + 120.f)
+		if (enemy->getBounds().top > this->window->getSize().y + 120.f ||
+			enemy->getBounds().top < -120.f ||
+			enemy->getBounds().left < -120.f ||
+			enemy->getBounds().left > this->window->getSize().x + 120.f)
 		{
 			delete this->enemies.at(counter);
 			this->enemies.erase(this->enemies.begin() + counter);
 			counter = counter - 1;
 
-			//std::cout << "Nombre d'ennemies : " << this->enemies.size() << "\n";
+			// std::cout << "Nombre d'ennemies : " << this->enemies.size() << "\n";
 		}
 
 		counter = counter + 1;
-
-		
 	}
 
 	counter = 0;
 	for (auto *enemy : this->enemiesRock)
 	{
 		enemy->update();
-		if(enemy->isDestroyed())
+		if (enemy->isDestroyed())
 		{
 			delete this->enemiesRock.at(counter);
 			this->enemiesRock.erase(this->enemiesRock.begin() + counter);
@@ -176,9 +165,6 @@ void Game::updateEnemies()
 
 		counter = counter + 1;
 	}
-
-	
-
 }
 
 void Game::renderWorld()
@@ -191,21 +177,22 @@ void Game::render()
 	// Clear the screen
 	this->window->clear();
 
-	//Draw background
+	// Draw background
 	this->renderWorld();
-	
-	//Draw enemies
-	for(auto *enemy : this->enemiesRock)
+
+	// Draw Player
+	this->player->renderPlayer(*this->window);
+
+	// Draw enemies
+	for (auto *enemy : this->enemiesRock)
 	{
 		enemy->render(this->window);
 	}
 
-	for(auto *enemy : this->enemies)
+	for (auto *enemy : this->enemies)
 	{
 		enemy->render(this->window);
 	}
-
-	
 
 	// Render
 	this->window->display();

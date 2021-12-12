@@ -1,3 +1,3 @@
-# To do
+# readme
 
-* Compresser les images
+Images Raw permettant de créer des textures 

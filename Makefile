@@ -1,4 +1,5 @@
 GXX = g++
+GDB = gdb
 LIB = -lsfml-graphics -lsfml-window -lsfml-system
 
 default: game-app.exe
@@ -10,3 +11,7 @@ game-app.exe:
 
 clear:
 	rm *.o game-app
+
+debug:
+	$(GXX) -g ./Sources/*.cpp -I "./SFML-2.5.1/include/"
+	$(GDB) ./bin/game-app

@@ -1,21 +1,27 @@
+#pragma once
 
 #include "../../SFML-2.5.1/include/SFML/Graphics.hpp"
 #include "../../SFML-2.5.1/include/SFML/System.hpp"
 #include "../../SFML-2.5.1/include/SFML/Window.hpp"
-#include <vector>
+#include <iostream>
+
+using namespace sf;
 
 class Player
 {
 private:
     // Variables du joueur
-    int x, y;
-    float health;
-    float speed;
-    sf::RectangleShape shape;
+    float moveSpeed;
     // Sprites
+    Sprite sprite;
+    Texture texture;
     // Orientattion
 
     // Private functions
+    void initSprite();
+    void initVariables();
+    void initShape();
+    void initTexture();
 
 public:
     // Constructors and Destructors
@@ -23,11 +29,10 @@ public:
     virtual ~Player();
 
     // Functions
-    void move(sf::Event);
-    void initVariables();
-    void initShape();
-    void updatePosition();
-    void renderPlayer();
+    void move(Event);
+    void update();
+    void renderPlayer(RenderTarget &);
+    void move(const float, const float);
 
     // Accessors
     std::vector<float, float> getPosition();
