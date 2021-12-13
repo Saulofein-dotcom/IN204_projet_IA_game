@@ -25,7 +25,7 @@ void Game::initPlayer()
 	/*
 	Set up the player
 	*/
-	this->player = new Player();
+	this->player = new Player(this->window);
 }
 
 void Game::initEnemies()
@@ -76,8 +76,13 @@ void Game::run()
 void Game::update()
 {
 	this->updatePollEvents();
-	this->player->update();
+	this->updatePlayer();
 	this->updateEnemies();
+}
+
+void Game::updatePlayer()
+{
+	this->player->update();
 }
 
 void Game::updatePollEvents()
@@ -190,6 +195,9 @@ void Game::render()
 
 	// Draw Player
 	this->player->renderPlayer(*this->window);
+
+	// Draw Fireballs
+	this->player->renderFireballs(*this->window);
 
 	// Draw enemies
 	for (auto *enemy : this->enemiesRock)

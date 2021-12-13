@@ -3,7 +3,7 @@
 void EnemyRock::initVariables()
 {
 
-	this->speed   = 6.f;
+	this->speed = 6.f;
 	this->exploded = false;
 	this->toDestroy = false;
 	this->isDangerous = false;
@@ -11,7 +11,7 @@ void EnemyRock::initVariables()
 
 void EnemyRock::initTexture()
 {
-	//Load a texture from file
+	// Load a texture from file
 	this->texture = new Texture();
 	if (!this->texture->loadFromFile("Textures/rock_air.png"))
 	{
@@ -33,24 +33,24 @@ void EnemyRock::initAnimation()
 
 void EnemyRock::initSprite()
 {
-	//Set texture to sprite
+	// Set texture to sprite
 	this->sprite.setTexture(*this->texture);
 
-	this->currentFrame = IntRect(0,0,150,150);
+	this->currentFrame = IntRect(0, 0, 150, 150);
 
 	this->sprite.setTextureRect(this->currentFrame);
 
-	//Resize the Sprite
+	// Resize the Sprite
 	this->sprite.scale(1.f, 1.f);
 
-	//Set texture to sprite
+	// Set texture to sprite
 	this->spriteShadow.setTexture(*this->textureShadow);
 
-	this->currentFrameShadow = IntRect(0,0,150,48);
+	this->currentFrameShadow = IntRect(0, 0, 150, 48);
 
 	this->spriteShadow.setTextureRect(this->currentFrameShadow);
 
-	//Resize the Sprite
+	// Resize the Sprite
 	this->spriteShadow.scale(1.f, 1.f);
 }
 
@@ -63,14 +63,13 @@ EnemyRock::EnemyRock(float pos_x, float pos_y, float pos_x_explode, float pos_y_
 	this->posXExplode = pos_x_explode;
 	this->posYExplode = pos_y_explode;
 	this->spriteShadow.setPosition(this->posXExplode, this->posYExplode + 120);
-    this->sprite.setPosition(pos_x, pos_y);
-
+	this->sprite.setPosition(pos_x, pos_y);
 }
 
 EnemyRock::~EnemyRock()
 {
 	delete this->textureShadow;
-    delete this->texture;
+	delete this->texture;
 }
 
 /*-------------------------------------*/
@@ -96,61 +95,54 @@ bool EnemyRock::isDestroyed() const
 
 void EnemyRock::update()
 {
-    if(!this->exploded) this->sprite.move(0, this->speed);
-	if(this->sprite.getPosition().y + 100 > this->getPosYExplode()) std::cout << "Aie";
-	//std::cout << "Enemy is x : " << this->getBounds().left << ", y : " << this->getBounds().top << "\n";
-	this->updateAnimation();
+	if (!this->exploded)
+		this->sprite.move(0, this->speed);
+	if (this->sprite.getPosition().y + 100 > this->getPosYExplode())
+		// std::cout << "Aie";
+		// std::cout << "Enemy is x : " << this->getBounds().left << ", y : " << this->getBounds().top << "\n";
+		this->updateAnimation();
 }
-
 
 void EnemyRock::updateAnimation()
 {
-	if(this->animationTimerShadow.getElapsedTime().asSeconds() >= 0.2f && this->currentFrameShadow.left < 750 && !this->exploded)
+	if (this->animationTimerShadow.getElapsedTime().asSeconds() >= 0.2f && this->currentFrameShadow.left < 750 && !this->exploded)
 	{
-		this->currentFrameShadow.left = (this->currentFrameShadow.left + 150);	
+		this->currentFrameShadow.left = (this->currentFrameShadow.left + 150);
 		this->animationTimerShadow.restart();
 	}
-	if(this->currentFrameShadow.left >= 900) this->animationTimerShadow.restart();
+	if (this->currentFrameShadow.left >= 900)
+		this->animationTimerShadow.restart();
 	this->spriteShadow.setTextureRect(this->currentFrameShadow);
 
-
-	if(this->animationTimer.getElapsedTime().asSeconds() >= 1.f  && !this->exploded && this->getBounds().top < this->getPosYExplode())
+	if (this->animationTimer.getElapsedTime().asSeconds() >= 1.f && !this->exploded && this->getBounds().top < this->getPosYExplode())
 	{
-		this->currentFrame.left = (this->currentFrame.left + 150) % 450;	
+		this->currentFrame.left = (this->currentFrame.left + 150) % 450;
 		this->animationTimer.restart();
 	}
-	
 
-	else if(this->getBounds().top >= this->getPosYExplode() && !this->exploded) 
+	else if (this->getBounds().top >= this->getPosYExplode() && !this->exploded)
 	{
 		exploded = true;
 		this->currentFrame.top = 150;
 		this->currentFrame.left = 0;
 		this->animationTimer.restart();
 	}
-	else if(this->exploded && this->currentFrame.left < 1050 && this->animationTimer.getElapsedTime().asSeconds() >= 0.06f)
+	else if (this->exploded && this->currentFrame.left < 1050 && this->animationTimer.getElapsedTime().asSeconds() >= 0.06f)
 	{
 		this->currentFrame.left = (this->currentFrame.left + 150);
 		this->currentFrameShadow.left > 150 ? this->currentFrameShadow.left = this->currentFrameShadow.left - 300 : this->currentFrameShadow.left = 0;
 		this->animationTimer.restart();
 	}
 
-	else if(this->exploded && this->currentFrame.left >= 1050) 
+	else if (this->exploded && this->currentFrame.left >= 1050)
 	{
 		this->toDestroy = true;
 	}
 	this->sprite.setTextureRect(this->currentFrame);
-
-
-
-
-
-
 }
 
-void EnemyRock::render(RenderTarget* target)
+void EnemyRock::render(RenderTarget *target)
 {
 	target->draw(this->spriteShadow);
 	target->draw(this->sprite);
 }
-

@@ -3,6 +3,7 @@
 #include "Player.h"
 #include "Enemy.h"
 #include "EnemyRock.h"
+
 #include "../../SFML-2.5.1/include/SFML/Graphics.hpp"
 
 using namespace sf;
@@ -45,6 +46,7 @@ public:
     void update();
     void updatePollEvents();
     void updateEnemies();
+    void updatePlayer();
 
     void render();
     void renderWorld();
