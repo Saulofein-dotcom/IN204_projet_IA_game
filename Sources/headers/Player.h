@@ -6,6 +6,8 @@
 #include <iostream>
 #include <vector>
 #include "Fireball.h"
+#include <math.h>
+#include <iostream>
 
 using namespace sf;
 
@@ -20,18 +22,20 @@ private:
     std::vector<Fireball *> fireballs;
     float attackCoolDown;
     float attackCoolDownMax;
+    Vector2f mouseDirection;
 
     // Sprites
     Sprite sprite;
     Texture texture;
-
-    // Orientattion
+    Sprite swordSprite;
+    Texture swordTexture;
 
     // Private functions
     void initSprite();
     void initVariables();
     void initTexture();
     void initCoolDowns();
+    void initPosition();
 
 public:
     // Constructors and Destructors
@@ -43,6 +47,7 @@ public:
     void update();
     void updateFireballs();
     void updateAttack();
+    void updateSwordRotation();
     const bool canAttack();
     void renderPlayer(RenderTarget &);
     void renderFireballs(RenderTarget &);
@@ -52,5 +57,7 @@ public:
     // Accessors
     std::vector<Fireball *> getFireballs();
     Vector2f getPosition();
-    Vector2f getDirection();
+    Vector2f getMouseDirection();
+    float getRotationAngle(float, float);
+    const FloatRect getBounds() const;
 };

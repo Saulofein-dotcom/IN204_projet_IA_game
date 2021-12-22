@@ -4,6 +4,7 @@
 #include "../../SFML-2.5.1/include/SFML/Window.hpp"
 #include <vector>
 #include <iostream>
+#include <math.h>
 
 using namespace sf;
 
@@ -33,6 +34,7 @@ public:
     void move();
     void updateFireball();
     void renderFireball(RenderTarget &);
+    float getRotationAngle(float, float);
 
     // Accesors
     const FloatRect getBounds() const;

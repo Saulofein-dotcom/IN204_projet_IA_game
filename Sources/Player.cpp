@@ -15,15 +15,31 @@ void Player::initTexture()
     {
         std::cout << "ERROR::PLAYER::INITTEXTURE::Could not load texture file" << std::endl;
     }
+    // Same for sword
+    if (!this->swordTexture.loadFromFile("Textures/sword.png"))
+    {
+        std::cout << "ERROR::PLAYER::INITTEXTURE::Could not load texture file" << std::endl;
+    }
 }
 
 void Player::initSprite()
 {
     // Set texture to sprite
     this->sprite.setTexture(this->texture);
+    this->swordSprite.setTexture(this->swordTexture);
 
-    // Resize the sprite
+    // Resize the player sprite and sword sprite
     this->sprite.scale(0.8f, 0.8f);
+    this->swordSprite.scale(0.2f, 0.2f);
+    this->swordSprite.setOrigin(this->swordSprite.getLocalBounds().width / 2, 0);
+}
+
+void Player::initPosition()
+{
+    this->sprite.setPosition(this->window->getSize().x / 2, this->window->getSize().y / 2);
+    this->swordSprite.setPosition(
+        this->getPosition().x + this->getBounds().width / 2,
+        this->getPosition().y + this->getBounds().height / 2);
 }
 
 // Constructors and destructors
@@ -32,6 +48,7 @@ Player::Player()
     this->initVariables();
     this->initTexture();
     this->initSprite();
+    this->initPosition();
 }
 
 Player::Player(RenderWindow *window)
@@ -40,6 +57,7 @@ Player::Player(RenderWindow *window)
     this->initVariables();
     this->initTexture();
     this->initSprite();
+    this->initPosition();
 }
 
 Player::~Player()
@@ -52,6 +70,7 @@ Player::~Player()
 // Functions
 void Player::renderPlayer(RenderTarget &target)
 {
+    target.draw(this->swordSprite);
     target.draw(this->sprite);
 }
 
@@ -66,13 +85,18 @@ void Player::renderFireballs(RenderTarget &target)
 void Player::move(const float dirX, const float dirY)
 {
     this->sprite.move(this->moveSpeed * dirX, this->moveSpeed * dirY);
+    this->swordSprite.move(this->moveSpeed * dirX, this->moveSpeed * dirY);
 }
 
 void Player::shootFireballs()
 {
-    Vector2f direction = this->getDirection();
-    Vector2f position = this->getPosition();
-    this->fireballs.push_back(new Fireball(position.x, position.y, 0.f, 1.f));
+    Vector2f direction = this->getMouseDirection();
+    Vector2f swordPosition = this->swordSprite.getPosition();
+    this->fireballs.push_back(new Fireball(
+        swordPosition.x,
+        swordPosition.y,
+        direction.x,
+        direction.y));
 }
 
 void Player::updateFireballs()
@@ -84,11 +108,11 @@ void Player::updateFireballs()
     unsigned counter = 0;
     for (auto *fireball : this->fireballs)
     {
-        std::cout << this->fireballs.size() << std::endl;
         fireball->updateFireball(); // Mouvement fireball
+
         if (fireball->getBounds().top + fireball->getBounds().height < 0.f)
         {
-            // Delete fireball
+            // Delete fireball if out of bounds
             delete this->fireballs.at(counter);
             this->fireballs.erase(this->fireballs.begin() + counter);
             --counter;
@@ -96,7 +120,6 @@ void Player::updateFireballs()
 
         ++counter;
     }
-    std::cout << "Counter final : " << counter << std::endl;
 }
 
 void Player::updateAttack()
@@ -105,9 +128,14 @@ void Player::updateAttack()
         this->attackCoolDown += 1.f;
 }
 
+void Player::updateSwordRotation()
+{
+    this->swordSprite.setRotation(this->getRotationAngle(this->getMouseDirection().x, this->getMouseDirection().y));
+}
+
 void Player::update()
 {
-    // Déplacement
+    // Update Position
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Z))
         this->move(0.f, -1.f);
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q))
@@ -117,15 +145,16 @@ void Player::update()
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
         this->move(1.f, 0.f);
 
-    // Tire de fireball
+    // Update tire de fireball
     if (Mouse::isButtonPressed(Mouse::Left) && this->canAttack())
     {
-        std::cout << "PAN !" << std::endl;
         this->shootFireballs();
     }
     this->updateAttack();
-    // Mouvement des fireballs
+    // Update fireballs position
     this->updateFireballs();
+    // Update sword rotation
+    this->updateSwordRotation();
 }
 
 const bool Player::canAttack()
@@ -149,10 +178,29 @@ Vector2f Player::getPosition()
     return this->sprite.getPosition();
 }
 
-Vector2f Player::getDirection()
+Vector2f Player::getMouseDirection()
 {
-    float mouseX = Mouse::getPosition().x;
-    float mouseY = Mouse::getPosition().y;
-    Vector2f direction(mouseX / this->window->getSize().x, mouseY / this->window->getSize().y);
-    return direction;
+    Vector2f mouseDirection;
+    float mouseX = Mouse::getPosition(*this->window).x;
+    float mouseY = Mouse::getPosition(*this->window).y;
+    float posXCenter = this->getPosition().x;
+    float posYCenter = this->getPosition().y;
+    float norm = sqrt((posXCenter - mouseX) * (posXCenter - mouseX) + (posYCenter - mouseY) * (posYCenter - mouseY));
+
+    mouseDirection.x = -(posXCenter - mouseX) / norm;
+    mouseDirection.y = -(posYCenter - mouseY) / norm;
+    return mouseDirection;
+}
+
+float Player::getRotationAngle(float X, float Y)
+{
+    if (Y > 0)
+        return std::acos(X) * 180.0f / 3.1415 - 90.f;
+    else
+        return std::acos(-X) * 180.0f / 3.1415 + 90.f;
+}
+
+const FloatRect Player::getBounds() const
+{
+    return this->sprite.getGlobalBounds();
 }
