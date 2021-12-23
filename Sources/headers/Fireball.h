@@ -36,6 +36,6 @@ public:
     void renderFireball(RenderTarget &);
     float getRotationAngle(float, float);
 
-    // Accesors
+    // Getters
     const FloatRect getBounds() const;
 };

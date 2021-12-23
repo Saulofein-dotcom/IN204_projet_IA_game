@@ -110,7 +110,10 @@ void Player::updateFireballs()
     {
         fireball->updateFireball(); // Mouvement fireball
 
-        if (fireball->getBounds().top + fireball->getBounds().height < 0.f)
+        if ((fireball->getBounds().top + fireball->getBounds().height < 0.f) ||
+            (fireball->getBounds().top > this->window->getSize().y) ||
+            (fireball->getBounds().left > this->window->getSize().x) ||
+            (fireball->getBounds().left + fireball->getBounds().width < 0))
         {
             // Delete fireball if out of bounds
             delete this->fireballs.at(counter);
@@ -167,7 +170,18 @@ const bool Player::canAttack()
     return false;
 }
 
-// Accessors
+// Setters
+void Player::setPosition(sf::Vector2f position)
+{
+    this->sprite.setPosition(position);
+}
+
+void Player::setPosition(float x, float y)
+{
+    this->sprite.setPosition(x, y);
+}
+
+// Getters
 std::vector<Fireball *> Player::getFireballs()
 {
     return this->fireballs;

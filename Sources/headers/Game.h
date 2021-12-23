@@ -30,11 +30,16 @@ private:
     float spawnTimerMaxRock;
     std::vector<EnemyRock *> enemiesRock;
 
+    // GUI
+    sf::Font font;
+    sf::Text timeText;
+
     // Fonctions privées
     void initWindow();
     void initWorld();
     void initPlayer();
     void initEnemies();
+    void initGUI();
 
 public:
     Game();
@@ -47,7 +52,12 @@ public:
     void updatePollEvents();
     void updateEnemies();
     void updatePlayer();
+    void updateGUI();
 
+    void renderGUI();
     void render();
     void renderWorld();
+
+    // Accessors
+    std::vector<Enemy *> getEnemies();
 };

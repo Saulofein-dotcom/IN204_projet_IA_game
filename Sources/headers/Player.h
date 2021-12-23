@@ -19,7 +19,6 @@ private:
 
     // Variables du joueur
     float moveSpeed;
-    std::vector<Fireball *> fireballs;
     float attackCoolDown;
     float attackCoolDownMax;
     Vector2f mouseDirection;
@@ -43,6 +42,9 @@ public:
     Player(RenderWindow *);
     virtual ~Player();
 
+    // Public Variables
+    std::vector<Fireball *> fireballs;
+
     // Functions
     void update();
     void updateFireballs();
@@ -54,7 +56,11 @@ public:
     void move(const float, const float);
     void shootFireballs();
 
-    // Accessors
+    // Setters
+    void setPosition(float, float);
+    void setPosition(sf::Vector2f);
+
+    // Getters
     std::vector<Fireball *> getFireballs();
     Vector2f getPosition();
     Vector2f getMouseDirection();
