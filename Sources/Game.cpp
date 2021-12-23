@@ -43,14 +43,20 @@ void Game::initEnemies()
 void Game::initGUI()
 {
 	// Load font
-	if (!this->font.loadFromFile("Fonts/arcadeclassic.ttf"))
+	if (!this->font.loadFromFile("Fonts/ARCADE.TTF"))
 		std::cout << "ERROR::GAME::Failed to load font\n";
 
 	// Init time text
 	this->timeText.setFont(this->font);
-	this->timeText.setCharacterSize(50);
+	this->timeText.setCharacterSize(75);
 	this->timeText.setFillColor(sf::Color::White);
-	this->timeText.setString("test");
+	this->timeText.setString("00:00");
+	this->timeText.setPosition(30.f, 10.f);
+}
+
+void Game::initClock()
+{
+	this->clock.restart();
 }
 
 Game::Game()
@@ -59,6 +65,7 @@ Game::Game()
 	this->initWorld();
 	this->initGUI();
 	this->initPlayer();
+	this->initClock();
 	this->initEnemies();
 }
 
@@ -89,27 +96,43 @@ void Game::run()
 
 void Game::update()
 {
+	this->updateClock();
 	this->updateGUI();
 	this->updatePollEvents();
 	this->updatePlayer();
 	this->updateEnemies();
 }
 
+void Game::updateClock()
+{
+	this->elapsedTime = this->clock.getElapsedTime();
+}
+
 void Game::updateGUI()
 {
+	std::stringstream ss;
+	ss << std::setw(2)
+	   << std::setfill('0')
+	   << static_cast<int>(this->elapsedTime.asSeconds()) / 60
+	   << ":"
+	   << std::setw(2)
+	   << std::setfill('0')
+	   << static_cast<int>(this->elapsedTime.asSeconds()) % 60;
+
+	this->timeText.setString(ss.str());
 }
 
 void Game::updatePlayer()
 {
 	this->player->update();
-	// TODO : refactoring + update sword collision accordingly to player collision
+	// TODO : refactoring + update sword collision according to player collision
 	if (this->player->getBounds().left < 0)
 		this->player->setPosition(0.f, this->player->getBounds().top);
-	if (this->player->getBounds().left + this->player->getBounds().width > this->window->getSize().x)
+	else if (this->player->getBounds().left + this->player->getBounds().width > this->window->getSize().x)
 		this->player->setPosition(this->window->getSize().x - this->player->getBounds().width, this->player->getBounds().top);
 	if (this->player->getBounds().top + this->player->getBounds().height > this->window->getSize().y)
 		this->player->setPosition(this->player->getBounds().left, this->window->getSize().y - this->player->getBounds().height);
-	if (this->player->getBounds().top < 0)
+	else if (this->player->getBounds().top < 0)
 		this->player->setPosition(this->player->getBounds().left, 0.f);
 }
 

@@ -3,6 +3,10 @@
 #include "Player.h"
 #include "Enemy.h"
 #include "EnemyRock.h"
+#include <string>
+#include <sstream>
+#include <iostream>
+#include <iomanip>
 
 #include "../../SFML-2.5.1/include/SFML/Graphics.hpp"
 
@@ -34,12 +38,17 @@ private:
     sf::Font font;
     sf::Text timeText;
 
+    // Time
+    Clock clock;
+    Time elapsedTime;
+
     // Fonctions privées
     void initWindow();
     void initWorld();
     void initPlayer();
     void initEnemies();
     void initGUI();
+    void initClock();
 
 public:
     Game();
@@ -53,6 +62,7 @@ public:
     void updateEnemies();
     void updatePlayer();
     void updateGUI();
+    void updateClock();
 
     void renderGUI();
     void render();
