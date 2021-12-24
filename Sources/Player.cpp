@@ -85,7 +85,6 @@ void Player::renderFireballs(RenderTarget &target)
 void Player::move(const float dirX, const float dirY)
 {
     this->sprite.move(this->moveSpeed * dirX, this->moveSpeed * dirY);
-    this->swordSprite.move(this->moveSpeed * dirX, this->moveSpeed * dirY);
 }
 
 void Player::shootFireballs()
@@ -125,6 +124,11 @@ void Player::updateFireballs()
     }
 }
 
+void Player::updateSwordPosition()
+{
+    this->swordSprite.setPosition(this->getBounds().left + this->getBounds().width / 2, this->getBounds().top + this->getBounds().height / 2);
+}
+
 void Player::updateAttack()
 {
     if (this->attackCoolDown < this->attackCoolDownMax)
@@ -153,9 +157,15 @@ void Player::update()
     {
         this->shootFireballs();
     }
+    // Update attack cooldown
     this->updateAttack();
+
     // Update fireballs position
     this->updateFireballs();
+
+    // Update sword position
+    this->updateSwordPosition();
+
     // Update sword rotation
     this->updateSwordRotation();
 }

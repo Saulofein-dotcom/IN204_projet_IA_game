@@ -50,6 +50,7 @@ public:
     void updateFireballs();
     void updateAttack();
     void updateSwordRotation();
+    void updateSwordPosition();
     const bool canAttack();
     void renderPlayer(RenderTarget &);
     void renderFireballs(RenderTarget &);
