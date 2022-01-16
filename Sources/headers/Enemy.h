@@ -12,7 +12,7 @@ class Enemy
 {
 protected:
     Sprite sprite;
-	Texture* texture;
+    Texture *texture;
     Clock animationTimer;
 
     float speed;
@@ -23,10 +23,10 @@ protected:
     float directionX;
     float directionY;
 
-    //Animation
+    // Animation
     IntRect currentFrame;
 
-    //Functions
+    // Functions
     void initVariables();
     void initShape();
     void initTexture();
@@ -38,16 +38,11 @@ public:
     Enemy(float pos_x, float pos_y, float pos_x_center, float pos_y_center);
     ~Enemy();
 
-    //Accessors
-	const FloatRect getBounds() const;
-    
+    // Accessors
+    const FloatRect getBounds() const;
 
-    //Functions
+    // Functions
     void updateAnimation();
-	void update();
-	void render(RenderTarget* target);
-
-    
-
-
+    void update();
+    void render(RenderTarget *target);
 };

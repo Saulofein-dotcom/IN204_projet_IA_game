@@ -7,17 +7,16 @@
 #include <iostream>
 #include <math.h>
 
-
 using namespace sf;
 
 class EnemyRock
 {
 protected:
     Sprite sprite;
-	Texture* texture;
+    Texture *texture;
 
     Sprite spriteShadow;
-    Texture* textureShadow;
+    Texture *textureShadow;
     Clock animationTimerShadow;
 
     Clock animationTimer;
@@ -29,13 +28,13 @@ protected:
 
     bool exploded;
     bool toDestroy;
-    bool isDangerous;
+    bool dangerous;
 
-    //Animation
+    // Animation
     IntRect currentFrame;
     IntRect currentFrameShadow;
 
-    //Functions
+    // Functions
     void initVariables();
     void initShape();
     void initTexture();
@@ -47,18 +46,16 @@ public:
     EnemyRock(float pos_x, float pos_y, float pos_x_explode, float pos_y_explode);
     ~EnemyRock();
 
-    //Accessors
-	const FloatRect getBounds() const;
+    // Accessors
+    const FloatRect getBounds() const;
     float getPosYExplode() const;
     bool isDestroyed() const;
+    bool isDangerous() const;
 
-    //Functions
+    // Functions
     void updateAnimation();
-	void update();
+    void updateDangerous();
+    void update();
 
-    void render(RenderTarget* target);
-
-    
-
-
+    void render(RenderTarget *target);
 };

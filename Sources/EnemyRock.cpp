@@ -6,7 +6,7 @@ void EnemyRock::initVariables()
 	this->speed = 6.f;
 	this->exploded = false;
 	this->toDestroy = false;
-	this->isDangerous = false;
+	this->dangerous = false;
 }
 
 void EnemyRock::initTexture()
@@ -89,18 +89,34 @@ bool EnemyRock::isDestroyed() const
 {
 	return this->toDestroy;
 }
+
+bool EnemyRock::isDangerous() const
+{
+	return this->dangerous;
+}
 /*-------------------------------------*/
 /*--------------Update-----------------*/
 /*-------------------------------------*/
 
 void EnemyRock::update()
 {
+	// Move rock enemy
 	if (!this->exploded)
 		this->sprite.move(0, this->speed);
+
 	if (this->sprite.getPosition().y + 100 > this->getPosYExplode())
 		// std::cout << "Aie";
 		// std::cout << "Enemy is x : " << this->getBounds().left << ", y : " << this->getBounds().top << "\n";
 		this->updateAnimation();
+
+	// Update dangerous
+	this->updateDangerous();
+}
+
+void EnemyRock::updateDangerous()
+{
+	if (this->sprite.getPosition().y + 50 >= this->getPosYExplode())
+		this->dangerous = true;
 }
 
 void EnemyRock::updateAnimation()

@@ -52,6 +52,15 @@ void Game::initGUI()
 	this->timeText.setFillColor(sf::Color::White);
 	this->timeText.setString("00:00");
 	this->timeText.setPosition(30.f, 10.f);
+
+	// Init gameOverText
+	this->gameOverText.setFont(this->font);
+	this->gameOverText.setCharacterSize(60);
+	this->gameOverText.setFillColor(sf::Color::Red);
+	this->gameOverText.setString("Game Over");
+	this->gameOverText.setPosition(
+		this->window->getSize().x / 2.f - this->gameOverText.getGlobalBounds().width / 2.f,
+		this->window->getSize().y / 2.f - this->gameOverText.getGlobalBounds().height / 2.f);
 }
 
 void Game::initClock()
@@ -72,7 +81,7 @@ Game::Game()
 Game::~Game()
 {
 	delete this->window; // Delete window
-	delete this->player; // Delete player
+	delete this->player; // Delete player and fireballs
 
 	// Delete enemies
 	for (auto *i : this->enemies)
@@ -124,7 +133,8 @@ void Game::updateGUI()
 
 void Game::updatePlayer()
 {
-	this->player->update();
+	this->player->update(); // Move player, sword, udpdate fireballs
+
 	// TODO : refactoring + update sword collision according to player collision
 	if (this->player->getBounds().left < 0)
 		this->player->setPosition(0.f, this->player->getBounds().top);
@@ -138,6 +148,9 @@ void Game::updatePlayer()
 
 void Game::updatePollEvents()
 {
+	/*
+		Get events to close the window
+	*/
 	Event e;
 	while (this->window->pollEvent(e))
 	{
@@ -195,12 +208,19 @@ void Game::updateEnemies()
 		this->spawnTimerRock = 0.f;
 	}
 
-	// Update position of enemies
+	// Update position of skeleton enemies
 	bool enemy_removed = false;
 	for (int i = 0; i < this->enemies.size(); ++i)
 	{
 		// Move the enemy
 		this->enemies[i]->update();
+
+		// Check for collision with player
+		if (this->enemies[i]->getBounds().intersects(this->player->getBounds()))
+		{
+			// End of game
+			this->triggerEndOfGame();
+		}
 
 		// Enemies hit by a fireball are destroyed and the fireball is deleted
 		for (int j = 0; j < this->player->fireballs.size() && !enemy_removed; ++j)
@@ -233,7 +253,14 @@ void Game::updateEnemies()
 	int counter = 0;
 	for (auto *enemy : this->enemiesRock)
 	{
-		enemy->update();
+		enemy->update(); // Move the rock enemy
+
+		// Check for collision with player
+		if (this->player->getBounds().intersects(enemy->getBounds()) && enemy->isDangerous())
+		{
+			// End of game
+			this->triggerEndOfGame();
+		}
 		if (enemy->isDestroyed())
 		{
 			delete this->enemiesRock.at(counter);
@@ -243,6 +270,15 @@ void Game::updateEnemies()
 
 		++counter;
 	}
+}
+
+void Game::triggerEndOfGame()
+{
+	/*
+		This function triggers the end of the game which for now is just
+		the window closing
+	*/
+	this->window->close();
 }
 
 // Accessors

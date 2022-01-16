@@ -1,5 +1,4 @@
 #pragma once
-
 #include "Player.h"
 #include "Enemy.h"
 #include "EnemyRock.h"
@@ -28,15 +27,17 @@ private:
     // Enemies
     float spawnTimer;
     float spawnTimerMax;
-    std::vector<Enemy *> enemies;
+    std::vector<Enemy *> enemies; // Skeleton enemies
 
     float spawnTimerRock;
     float spawnTimerMaxRock;
-    std::vector<EnemyRock *> enemiesRock;
+    std::vector<EnemyRock *> enemiesRock; // Rock enemies
 
     // GUI
     sf::Font font;
     sf::Text timeText;
+
+    sf::Text gameOverText; // Unused because not useful for AI
 
     // Time
     Clock clock;
@@ -67,6 +68,8 @@ public:
     void renderGUI();
     void render();
     void renderWorld();
+
+    void triggerEndOfGame();
 
     // Accessors
     std::vector<Enemy *> getEnemies();
