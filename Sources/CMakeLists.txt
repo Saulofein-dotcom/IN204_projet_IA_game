@@ -14,7 +14,7 @@ include_directories(SFML_INCLUDE_DIR)
 
 find_package(SFML 2.5.1 COMPONENTS system window graphics network audio)
 find_package(Torch REQUIRED)
-
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
 if(SFML_FOUND)
     message(STATUS "SFML_INCLUDE_DIR: ${SFML_INCLUDE_DIR}")
@@ -23,4 +23,4 @@ if(SFML_FOUND)
 endif()
 
 add_executable(game-app main.cpp Game.cpp Player.cpp Fireball.cpp Enemy.cpp EnemyRock.cpp)
-target_link_libraries (game-app sfml-graphics sfml-window sfml-system sfml-network sfml-audio)
+target_link_libraries (game-app sfml-graphics sfml-window sfml-system sfml-network sfml-audio )

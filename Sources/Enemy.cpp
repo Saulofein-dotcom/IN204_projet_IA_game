@@ -20,7 +20,7 @@ void Enemy::initTexture()
 	*/
 
 	this->texture = new Texture();
-	if (!this->texture->loadFromFile("Textures/Enemy.png"))
+	if (!this->texture->loadFromFile("../../Textures/Enemy.png"))
 	{
 		std::cout << "ERROR::PLAYER::INITTEXTURE::Could not load texture from file \n";
 	}
