@@ -8,7 +8,7 @@ void Fireball::initVariables()
 void Fireball::initTexture()
 {
     // Load texture from file
-    if (!this->texture.loadFromFile("Textures/fireball.png"))
+    if (!this->texture.loadFromFile("../../Textures/fireball.png"))
     {
         std::cout << "ERROR::FIREBALL::INITTEXTURE::Could not load texture file" << std::endl;
     }

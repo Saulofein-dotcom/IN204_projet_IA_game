@@ -15,7 +15,7 @@ void Game::initWorld()
 	/*
 	Set up the background texture
 	*/
-	if (!this->worldBackgroundTexture.loadFromFile("Textures/background.png"))
+	if (!this->worldBackgroundTexture.loadFromFile("../../Textures/background.png"))
 		std::cout << "ERROR::GAME::Failed to load background texture \n";
 	this->worldBackground.setTexture(this->worldBackgroundTexture);
 }
@@ -43,7 +43,7 @@ void Game::initEnemies()
 void Game::initGUI()
 {
 	// Load font
-	if (!this->font.loadFromFile("Fonts/ARCADE.TTF"))
+	if (!this->font.loadFromFile("../../Fonts/ARCADE.TTF"))
 		std::cout << "ERROR::GAME::Failed to load font\n";
 
 	// Init time text
