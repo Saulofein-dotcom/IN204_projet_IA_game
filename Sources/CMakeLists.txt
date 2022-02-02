@@ -1,0 +1,37 @@
+cmake_minimum_required(VERSION 3.16)
+project(game-app)
+
+set(CMAKE_CXX_STANDARD 17)
+
+set(SFML_INCLUDE_DIR "/home/dbouchou/projets/IN204_projet_IA_game/SFML-2.5.1-Compiled/include")
+set(SFML_LIBRARY_DIR "/home/dbouchou/projets/IN204_projet_IA_game/SFML-2.5.1-Compiled/lib")
+set(TORCH_INCLUDE_DIR "/home/dbouchou/projets/IN204_projet_IA_game/libtorch/include")
+set(TORCH_LIBRARY_DIR "/home/dbouchou/projets/IN204_projet_IA_game/libtorch/lib")
+set(SFML_DIR "/home/dbouchou/projets/IN204_projet_IA_game/SFML-2.5.1-Compiled/lib/cmake/SFML")
+set(Torch_DIR "/home/dbouchou/projets/IN204_projet_IA_game/libtorch/share/cmake/Torch")
+
+link_directories(SFML_LIBRARY_DIR TORCH_LIBRARY_DIR)
+include_directories(SFML_INCLUDE_DIR TORCH_INCLUDE_DIR)
+
+
+find_package(SFML 2.5.1 COMPONENTS system window graphics network audio)
+find_package(Torch)
+
+
+add_executable(game-app test.cpp)
+
+target_link_libraries(game-app sfml-graphics sfml-window sfml-system sfml-network sfml-audio ${TORCH_LIBRARIES})
+set_property(TARGET game-app PROPERTY CXX_STANDARD 17)
+
+if(SFML_FOUND)
+    message(STATUS "SFML_INCLUDE_DIR: ${SFML_INCLUDE_DIR}")
+    message(STATUS "SFML_LIBRARIES: ${SFML_LIBRARIES}")
+    message(STATUS "SFML_VERSION: ${SFML_VERSION}")
+endif()
+
+# get_cmake_property(_variableNames VARIABLES)
+# list (SORT _variableNames)
+# foreach (_variableName ${_variableNames})
+#     message(STATUS "${_variableName}=${${_variableName}}")
+# endforeach()
+
