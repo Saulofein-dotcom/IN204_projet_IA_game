@@ -1,14 +1,8 @@
 #pragma once
-<<<<<<< HEAD
 
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>
-=======
-#include "../../SFML-2.5.1/include/SFML/Graphics.hpp"
-#include "../../SFML-2.5.1/include/SFML/System.hpp"
-#include "../../SFML-2.5.1/include/SFML/Window.hpp"
->>>>>>> romain
 #include <iostream>
 #include <vector>
 #include "Fireball.h"
