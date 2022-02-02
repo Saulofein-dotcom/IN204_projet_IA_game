@@ -3,7 +3,9 @@
 #include "Player.h"
 #include "Enemy.h"
 #include "EnemyRock.h"
-#include "../../SFML-2.5.1/include/SFML/Graphics.hpp"
+#include <SFML/Graphics.hpp>
+#include <SFML/System.hpp>
+#include <SFML/Window.hpp>
 
 using namespace sf;
 

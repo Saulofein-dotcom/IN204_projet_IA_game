@@ -4,6 +4,8 @@
 /*-----------Init functions------------*/
 /*-------------------------------------*/
 
+
+
 void EnemyRock::initVariables()
 {
 	/*

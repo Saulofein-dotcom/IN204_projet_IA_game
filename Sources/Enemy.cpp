@@ -1,4 +1,5 @@
 #include "./headers/Enemy.h"
+#include <SFML/Graphics/Texture.hpp>
 
 /*-------------------------------------*/
 /*-----------Init functions------------*/
