@@ -1,6 +1,10 @@
 #include "./headers/Game.h"
+<<<<<<< HEAD
 #include<time.h>
 //#include<torch/torch.h>
+=======
+#include <time.h>
+>>>>>>> romain
 
 int main()
 {

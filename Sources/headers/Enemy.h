@@ -13,7 +13,7 @@ class Enemy
 protected:
     //Enemy
     Sprite sprite;
-	Texture* texture;
+    Texture *texture;
     Clock animationTimer;
 
     //Attributes - an enemy has an initial position and a direction
@@ -23,10 +23,10 @@ protected:
     float directionX;
     float directionY;
 
-    //Animation
+    // Animation
     IntRect currentFrame;
 
-    //Functions
+    // Functions
     void initVariables();
     void initShape();
     void initTexture();
@@ -40,15 +40,16 @@ public:
     Enemy(float pos_x, float pos_y, float pos_x_center, float pos_y_center);
     ~Enemy();
 
+<<<<<<< HEAD
     //Accessors
 	const FloatRect getBounds() const;
+=======
+    // Accessors
+    const FloatRect getBounds() const;
+>>>>>>> romain
 
-    //Functions
+    // Functions
     void updateAnimation();
-	void update();
-	void render(RenderTarget* target);
-
-    
-
-
+    void update();
+    void render(RenderTarget *target);
 };

@@ -1,11 +1,19 @@
 #pragma once
-
 #include "Player.h"
 #include "Enemy.h"
 #include "EnemyRock.h"
+<<<<<<< HEAD
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>
+=======
+#include <string>
+#include <sstream>
+#include <iostream>
+#include <iomanip>
+
+#include "../../SFML-2.5.1/include/SFML/Graphics.hpp"
+>>>>>>> romain
 
 using namespace sf;
 
@@ -25,17 +33,29 @@ private:
     // Enemies
     float spawnTimer;
     float spawnTimerMax;
-    std::vector<Enemy *> enemies;
+    std::vector<Enemy *> enemies; // Skeleton enemies
 
     float spawnTimerRock;
     float spawnTimerMaxRock;
-    std::vector<EnemyRock *> enemiesRock;
+    std::vector<EnemyRock *> enemiesRock; // Rock enemies
+
+    // GUI
+    sf::Font font;
+    sf::Text timeText;
+
+    sf::Text gameOverText; // Unused because not useful for AI
+
+    // Time
+    Clock clock;
+    Time elapsedTime;
 
     // Fonctions privées
     void initWindow();
     void initWorld();
     void initPlayer();
     void initEnemies();
+    void initGUI();
+    void initClock();
 
 public:
     Game();
@@ -47,7 +67,16 @@ public:
     void update();
     void updatePollEvents();
     void updateEnemies();
+    void updatePlayer();
+    void updateGUI();
+    void updateClock();
 
+    void renderGUI();
     void render();
     void renderWorld();
+
+    void triggerEndOfGame();
+
+    // Accessors
+    std::vector<Enemy *> getEnemies();
 };

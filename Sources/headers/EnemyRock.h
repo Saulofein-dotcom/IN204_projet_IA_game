@@ -7,42 +7,37 @@
 #include <iostream>
 #include <math.h>
 
-
-
 using namespace sf;
 
 class EnemyRock
 {
 protected:
-
-    //Rock
+    // Rock
     Sprite sprite;
-	Texture* texture;
-    Clock animationTimer;
+    Texture *texture;
 
-    //Shadow
+    // Shadow
     Sprite spriteShadow;
-    Texture* textureShadow;
+    Texture *textureShadow;
     Clock animationTimerShadow;
 
-    
-    //Rock attributes
+    // Rock attributes
     float speed;
 
-    //Shadow attributes
+    // Shadow attributes
     float posXExplode;
     float posYExplode;
 
-    //Triggers
+    // Triggers
     bool exploded;
     bool toDestroy;
-    bool isDangerous;
+    bool dangerous;
 
-    //Animation
+    // Animation
     IntRect currentFrame;
     IntRect currentFrameShadow;
 
-    //Functions
+    // Functions
     void initVariables();
     void initShape();
     void initTexture();
@@ -50,23 +45,21 @@ protected:
     void initSprite();
 
 public:
-    //Cons/Dec
+    // Cons/Dec
     EnemyRock();
     EnemyRock(float pos_x, float pos_y, float pos_x_explode, float pos_y_explode);
     ~EnemyRock();
 
-    //Accessors
-	const FloatRect getBounds() const;
+    // Accessors
+    const FloatRect getBounds() const;
     float getPosYExplode() const;
     bool isDestroyed() const;
+    bool isDangerous() const;
 
-    //Functions
+    // Functions
     void updateAnimation();
-	void update();
+    void updateDangerous();
+    void update();
 
-    void render(RenderTarget* target);
-
-    
-
-
+    void render(RenderTarget *target);
 };

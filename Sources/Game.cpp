@@ -25,7 +25,7 @@ void Game::initPlayer()
 	/*
 	Set up the player
 	*/
-	this->player = new Player();
+	this->player = new Player(this->window);
 }
 
 void Game::initEnemies()
@@ -40,18 +40,48 @@ void Game::initEnemies()
 	this->spawnTimerRock = this->spawnTimerMaxRock;
 }
 
+void Game::initGUI()
+{
+	// Load font
+	if (!this->font.loadFromFile("Fonts/ARCADE.TTF"))
+		std::cout << "ERROR::GAME::Failed to load font\n";
+
+	// Init time text
+	this->timeText.setFont(this->font);
+	this->timeText.setCharacterSize(75);
+	this->timeText.setFillColor(sf::Color::White);
+	this->timeText.setString("00:00");
+	this->timeText.setPosition(30.f, 10.f);
+
+	// Init gameOverText
+	this->gameOverText.setFont(this->font);
+	this->gameOverText.setCharacterSize(60);
+	this->gameOverText.setFillColor(sf::Color::Red);
+	this->gameOverText.setString("Game Over");
+	this->gameOverText.setPosition(
+		this->window->getSize().x / 2.f - this->gameOverText.getGlobalBounds().width / 2.f,
+		this->window->getSize().y / 2.f - this->gameOverText.getGlobalBounds().height / 2.f);
+}
+
+void Game::initClock()
+{
+	this->clock.restart();
+}
+
 Game::Game()
 {
 	this->initWindow();
 	this->initWorld();
+	this->initGUI();
 	this->initPlayer();
+	this->initClock();
 	this->initEnemies();
 }
 
 Game::~Game()
 {
 	delete this->window; // Delete window
-	delete this->player; // Delete player
+	delete this->player; // Delete player and fireballs
 
 	// Delete enemies
 	for (auto *i : this->enemies)
@@ -75,13 +105,52 @@ void Game::run()
 
 void Game::update()
 {
+	this->updateClock();
+	this->updateGUI();
 	this->updatePollEvents();
-	this->player->update();
+	this->updatePlayer();
 	this->updateEnemies();
+}
+
+void Game::updateClock()
+{
+	this->elapsedTime = this->clock.getElapsedTime();
+}
+
+void Game::updateGUI()
+{
+	std::stringstream ss;
+	ss << std::setw(2)
+	   << std::setfill('0')
+	   << static_cast<int>(this->elapsedTime.asSeconds()) / 60
+	   << ":"
+	   << std::setw(2)
+	   << std::setfill('0')
+	   << static_cast<int>(this->elapsedTime.asSeconds()) % 60;
+
+	this->timeText.setString(ss.str());
+}
+
+void Game::updatePlayer()
+{
+	this->player->update(); // Move player, sword, udpdate fireballs
+
+	// TODO : refactoring + update sword collision according to player collision
+	if (this->player->getBounds().left < 0)
+		this->player->setPosition(0.f, this->player->getBounds().top);
+	else if (this->player->getBounds().left + this->player->getBounds().width > this->window->getSize().x)
+		this->player->setPosition(this->window->getSize().x - this->player->getBounds().width, this->player->getBounds().top);
+	if (this->player->getBounds().top + this->player->getBounds().height > this->window->getSize().y)
+		this->player->setPosition(this->player->getBounds().left, this->window->getSize().y - this->player->getBounds().height);
+	else if (this->player->getBounds().top < 0)
+		this->player->setPosition(this->player->getBounds().left, 0.f);
 }
 
 void Game::updatePollEvents()
 {
+	/*
+		Get events to close the window
+	*/
 	Event e;
 	while (this->window->pollEvent(e))
 	{
@@ -139,45 +208,93 @@ void Game::updateEnemies()
 		this->spawnTimerRock = 0.f;
 	}
 
-	// Update position of enemies
-	unsigned counter = 0;
-	for (auto *enemy : this->enemies)
+	// Update position of skeleton enemies
+	bool enemy_removed = false;
+	for (int i = 0; i < this->enemies.size(); ++i)
 	{
-		enemy->update();
+		// Move the enemy
+		this->enemies[i]->update();
 
-		if (enemy->getBounds().top > this->window->getSize().y + 120.f ||
-			enemy->getBounds().top < -120.f ||
-			enemy->getBounds().left < -120.f ||
-			enemy->getBounds().left > this->window->getSize().x + 120.f)
+		// Check for collision with player
+		if (this->enemies[i]->getBounds().intersects(this->player->getBounds()))
 		{
-			delete this->enemies.at(counter);
-			this->enemies.erase(this->enemies.begin() + counter);
-			counter = counter - 1;
-
-			// std::cout << "Nombre d'ennemies : " << this->enemies.size() << "\n";
+			// End of game
+			this->triggerEndOfGame();
 		}
 
-		counter = counter + 1;
+		// Enemies hit by a fireball are destroyed and the fireball is deleted
+		for (int j = 0; j < this->player->fireballs.size() && !enemy_removed; ++j)
+		{
+			if (this->player->fireballs[j]->getBounds().intersects(this->enemies[i]->getBounds()))
+			{
+				delete this->player->getFireballs().at(j);
+				this->player->fireballs.erase(this->player->fireballs.begin() + j);
+				delete this->enemies.at(i);
+				this->enemies.erase(this->enemies.begin() + i);
+				enemy_removed = true;
+			}
+		}
+
+		// Enemies out of bounds are deleted
+		if (!enemy_removed)
+		{
+			if (this->enemies[i]->getBounds().top > this->window->getSize().y + 120.f ||
+				this->enemies[i]->getBounds().top < -120.f ||
+				this->enemies[i]->getBounds().left < -120.f ||
+				this->enemies[i]->getBounds().left > this->window->getSize().x + 120.f)
+			{
+				delete this->enemies.at(i);
+				this->enemies.erase(this->enemies.begin() + i);
+			};
+		}
+		enemy_removed = false;
 	}
 
-	counter = 0;
+	int counter = 0;
 	for (auto *enemy : this->enemiesRock)
 	{
-		enemy->update();
+		enemy->update(); // Move the rock enemy
+
+		// Check for collision with player
+		if (this->player->getBounds().intersects(enemy->getBounds()) && enemy->isDangerous())
+		{
+			// End of game
+			this->triggerEndOfGame();
+		}
 		if (enemy->isDestroyed())
 		{
 			delete this->enemiesRock.at(counter);
 			this->enemiesRock.erase(this->enemiesRock.begin() + counter);
-			counter = counter - 1;
+			--counter;
 		}
 
-		counter = counter + 1;
+		++counter;
 	}
+}
+
+void Game::triggerEndOfGame()
+{
+	/*
+		This function triggers the end of the game which for now is just
+		the window closing
+	*/
+	this->window->close();
+}
+
+// Accessors
+std::vector<Enemy *> Game::getEnemies()
+{
+	return this->enemies;
 }
 
 void Game::renderWorld()
 {
 	this->window->draw(this->worldBackground);
+}
+
+void Game::renderGUI()
+{
+	this->window->draw(this->timeText);
 }
 
 void Game::render()
@@ -191,6 +308,9 @@ void Game::render()
 	// Draw Player
 	this->player->renderPlayer(*this->window);
 
+	// Draw Fireballs
+	this->player->renderFireballs(*this->window);
+
 	// Draw enemies
 	for (auto *enemy : this->enemiesRock)
 	{
@@ -201,6 +321,9 @@ void Game::render()
 	{
 		enemy->render(this->window);
 	}
+
+	// Draw the GUI
+	this->renderGUI();
 
 	// Render
 	this->window->display();
