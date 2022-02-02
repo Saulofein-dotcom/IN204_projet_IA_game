@@ -3,12 +3,14 @@ project(game-app)
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(SFML_INCLUDE_DIR "/home/dbouchou/projets/IN204_projet_IA_game/SFML-2.5.1-Compiled/include")
-set(SFML_LIBRARY_DIR "/home/dbouchou/projets/IN204_projet_IA_game/SFML-2.5.1-Compiled/lib")
-set(TORCH_INCLUDE_DIR "/home/dbouchou/projets/IN204_projet_IA_game/libtorch/include")
-set(TORCH_LIBRARY_DIR "/home/dbouchou/projets/IN204_projet_IA_game/libtorch/lib")
-set(SFML_DIR "/home/dbouchou/projets/IN204_projet_IA_game/SFML-2.5.1-Compiled/lib/cmake/SFML")
-set(Torch_DIR "/home/dbouchou/projets/IN204_projet_IA_game/libtorch/share/cmake/Torch")
+set(MY_DIR "")
+
+set(SFML_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/../SFML-2.5.1-Compiled/include")
+set(SFML_LIBRARY_DIR "${CMAKE_SOURCE_DIR}/../SFML-2.5.1-Compiled/lib")
+#set(TORCH_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/../libtorch/include")
+#set(TORCH_LIBRARY_DIR "${CMAKE_SOURCE_DIR}/../libtorch/lib")
+set(SFML_DIR "${CMAKE_SOURCE_DIR}/../SFML-2.5.1-Compiled/lib/cmake/SFML")
+set(Torch_DIR "${CMAKE_SOURCE_DIR}/../libtorch/share/cmake/Torch")
 
 link_directories(SFML_LIBRARY_DIR TORCH_LIBRARY_DIR)
 include_directories(SFML_INCLUDE_DIR TORCH_INCLUDE_DIR)
@@ -18,9 +20,9 @@ find_package(SFML 2.5.1 COMPONENTS system window graphics network audio)
 find_package(Torch)
 
 
-add_executable(game-app test.cpp)
+add_executable(game-app Enemy.cpp EnemyRock.cpp Fireball.cpp Game.cpp main.cpp Player.cpp)
 
-target_link_libraries(game-app sfml-graphics sfml-window sfml-system sfml-network sfml-audio ${TORCH_LIBRARIES})
+target_link_libraries(game-app sfml-graphics sfml-window sfml-system sfml-network sfml-audio)
 set_property(TARGET game-app PROPERTY CXX_STANDARD 17)
 
 if(SFML_FOUND)

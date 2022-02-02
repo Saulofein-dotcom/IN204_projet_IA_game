@@ -11,12 +11,12 @@ using namespace sf;
 class Enemy
 {
 protected:
-    //Enemy
+    // Enemy
     Sprite sprite;
     Texture *texture;
     Clock animationTimer;
 
-    //Attributes - an enemy has an initial position and a direction
+    // Attributes - an enemy has an initial position and a direction
     float speed;
     float posXCenter;
     float posYCenter;
@@ -34,19 +34,13 @@ protected:
     void initSprite();
 
 public:
-
-    //Cons/Dec
+    // Cons/Dec
     Enemy();
     Enemy(float pos_x, float pos_y, float pos_x_center, float pos_y_center);
     ~Enemy();
 
-<<<<<<< HEAD
-    //Accessors
-	const FloatRect getBounds() const;
-=======
     // Accessors
     const FloatRect getBounds() const;
->>>>>>> romain
 
     // Functions
     void updateAnimation();
