@@ -11,12 +11,12 @@ void Player::initVariables()
 void Player::initTexture()
 {
     // Load texture from file
-    if (!this->texture.loadFromFile("Textures/link_standing.png"))
+    if (!this->texture.loadFromFile("../../Textures/link_standing.png"))
     {
         std::cout << "ERROR::PLAYER::INITTEXTURE::Could not load texture file" << std::endl;
     }
     // Same for sword
-    if (!this->swordTexture.loadFromFile("Textures/sword.png"))
+    if (!this->swordTexture.loadFromFile("../../Textures/sword.png"))
     {
         std::cout << "ERROR::PLAYER::INITTEXTURE::Could not load texture file" << std::endl;
     }
