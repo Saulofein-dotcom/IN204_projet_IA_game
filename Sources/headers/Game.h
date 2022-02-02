@@ -2,12 +2,18 @@
 #include "Player.h"
 #include "Enemy.h"
 #include "EnemyRock.h"
+<<<<<<< HEAD
+#include <SFML/Graphics.hpp>
+#include <SFML/System.hpp>
+#include <SFML/Window.hpp>
+=======
 #include <string>
 #include <sstream>
 #include <iostream>
 #include <iomanip>
 
 #include "../../SFML-2.5.1/include/SFML/Graphics.hpp"
+>>>>>>> romain
 
 using namespace sf;
 

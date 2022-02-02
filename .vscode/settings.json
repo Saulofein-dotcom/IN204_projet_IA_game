@@ -52,11 +52,15 @@
         "streambuf": "cpp",
         "cinttypes": "cpp",
         "typeinfo": "cpp",
+<<<<<<< HEAD
+        "thread": "cpp"
+=======
         "compare": "cpp",
         "concepts": "cpp",
         "ranges": "cpp",
         "chrono": "cpp",
         "ratio": "cpp",
         "numbers": "cpp"
+>>>>>>> romain
     }
 }

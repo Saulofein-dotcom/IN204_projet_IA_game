@@ -1,7 +1,7 @@
 #pragma once
-#include "../../SFML-2.5.1/include/SFML/Graphics.hpp"
-#include "../../SFML-2.5.1/include/SFML/System.hpp"
-#include "../../SFML-2.5.1/include/SFML/Window.hpp"
+#include <SFML/Graphics.hpp>
+#include <SFML/System.hpp>
+#include <SFML/Window.hpp>
 #include "Enemy.h"
 #include <vector>
 #include <iostream>
@@ -12,20 +12,23 @@ using namespace sf;
 class EnemyRock
 {
 protected:
+    // Rock
     Sprite sprite;
     Texture *texture;
 
+    // Shadow
     Sprite spriteShadow;
     Texture *textureShadow;
     Clock animationTimerShadow;
 
-    Clock animationTimer;
-
+    // Rock attributes
     float speed;
 
+    // Shadow attributes
     float posXExplode;
     float posYExplode;
 
+    // Triggers
     bool exploded;
     bool toDestroy;
     bool dangerous;
@@ -42,6 +45,7 @@ protected:
     void initSprite();
 
 public:
+    // Cons/Dec
     EnemyRock();
     EnemyRock(float pos_x, float pos_y, float pos_x_explode, float pos_y_explode);
     ~EnemyRock();
