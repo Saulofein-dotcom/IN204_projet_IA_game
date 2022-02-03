@@ -2,4 +2,4 @@
 /bin/
 /libtorch
 /Sources/build
-/Sources/CMake*
+/Sources/CMakeLists.txt
