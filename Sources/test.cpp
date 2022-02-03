@@ -17,10 +17,10 @@ int main()
 {
     PPO_Memory ppo_memory(2);
     ppo_memory.states = {2, 3, 4, 5, 6, 4, 5};
-    vector<float> x;
+    vector<double> x;
     vector<double> c;
-    vector<float> v;
-    vector<float> b;
+    vector<double> v;
+    vector<double> b;
     vector<double> f;
     vector<double> g;
     vector<vector<long long>> test;

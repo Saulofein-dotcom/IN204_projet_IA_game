@@ -11,9 +11,9 @@ using namespace std;
 class PPO_Memory
 {
     public:
-        vector<float> states;
-        vector<float> probs;
-        vector<float> vals;
+        vector<double> states;
+        vector<double> probs;
+        vector<double> vals;
         vector<double> actions;
         vector<double> rewards;
         vector<double> dones;
@@ -85,7 +85,7 @@ class PPO_Memory
 
         }
 
-        void store_memory(auto state, auto action, auto probs, auto vals, auto reward, auto done)
+        void store_memory(double state, double action, double probs, double vals, double reward, double done)
         {
             this->states.push_back(state);
             this->actions.push_back(action);
