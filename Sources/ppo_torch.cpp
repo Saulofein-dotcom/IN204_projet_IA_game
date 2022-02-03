@@ -18,7 +18,7 @@ public:
     vector<double> actions;
     vector<double> rewards;
     vector<double> dones;
-    int batch_size;
+    long batch_size;
 
     template <typename T>
     vector<T> arange(T begin, T end, int jump)
@@ -37,7 +37,7 @@ public:
     static int myrandom(int i) { return rand() % i; }
 
 public:
-    PPO_Memory(int batch_size)
+    PPO_Memory(long batch_size)
     {
         this->states = {};
         this->probs = {};
@@ -193,5 +193,61 @@ class CriticNetwork : public nn::Module
             T::load(this->critic, this->checkpoint_file);
         }
 
+};
+
+
+class Agent
+{
+    public:
+        double gamma;
+        double policy_clip;
+        long n_epochs;
+        double gae_lambda;
+
+        ActorNetwork* actor;
+        CriticNetwork* critic;
+        PPO_Memory* memory;
+
+    public:
+        Agent(long n_actions, long input_dims, double gamma=0.99, double alpha=0.0003, double gae_lambda=0.95,
+                double policy_clip=0.2, long batch_size=64, long N=2048, long n_epochs=10)
+        {
+            this->gamma = gamma;
+            this->policy_clip = policy_clip;
+            this->n_epochs = n_epochs;
+            this->gae_lambda = gae_lambda;
+
+            this->actor = new ActorNetwork(n_actions, input_dims, alpha);
+            this->critic = new CriticNetwork(input_dims, alpha);
+            this->memory = new PPO_Memory(batch_size);
+
+        }
+
+        
+        void remember(auto state, auto action, auto probs, auto vals, auto reward, auto done)
+        {
+            this->memory->store_memory(state, action, probs, vals, reward, done);
+        }
+
+        void save_models()
+        {
+            cout << "...saving models..." << endl;
+            this->actor->save_checkpoint();
+            this->critic->save_checkpoint();
+        }
+
+        void load_models()
+        {
+            cout << "...loading models..." << endl;
+            this->actor->load_checkpoint();
+            this->critic->load_checkpoint();
+        }
+
+        /*
+        auto choose_action(vector<double> observation)
+        {
+            T::tensor state = T::tensor(observation);
+        }
+        */
 
 };
