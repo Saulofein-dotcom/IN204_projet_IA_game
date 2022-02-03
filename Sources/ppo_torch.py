@@ -132,7 +132,7 @@ class CriticNetwork(nn.Module):
                 chkpt_dir='./tmp/ppo'):
         super(CriticNetwork, self).__init__()
         
-        self.checkpoint_file = os.path.join(chkpt_dir, 'critic_torch_ppo')
+        self.checkpoint_file = os.path.join(chkpt_dir, 'critic_torch_ppo.pt')
         self.critic = nn.Sequential(
                     nn.Linear(*input_dims, fc1_dims),
                     nn.ReLU(),

@@ -4,3 +4,4 @@
 /Sources/build
 /Sources/*.txt
 /Sources/test_*.cpp
+/tmp

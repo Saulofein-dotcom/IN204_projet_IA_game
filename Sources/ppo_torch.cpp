@@ -108,7 +108,7 @@ public:
     string checkpoint_file;
     nn::Sequential actor;
     optim::Adam *optimizer;
-    T::Device device;
+    T::Device* device;
 
     ActorNetwork(long int n_actions, int input_dims, double alpha, long int fc1_dims, long int fc2_dims, string chkpt_dir = "../tmp/ppo") : Module()
     {
@@ -123,10 +123,57 @@ public:
             nn::Softmax(-1) // Comment on met dim = -1 en argument ?
         );
         this->optimizer = new optim::Adam(this->parameters(), T::optim::AdamOptions(alpha));
-        this->device = T::kCPU;
-        this->actor->to(device);
+        this->device = new T::Device(T::cuda::is_available() ? T::kCUDA : T::kCPU);
+        this->actor->to(*this->device);
     }
     T::Tensor forward(T::Tensor input)
     {
     }
+};
+
+class CriticNetwork : public nn::Module
+{
+    public:
+        string checkpoint_file;
+        nn::Sequential critic;
+        optim::Adam* optimizer;
+        T::Device* device;
+    
+
+
+    public:
+        explicit CriticNetwork(long long input_dims, double alpha, long long fc1_dims=256, long long fc2_dims=256, string chkpt_dir="../tmp/ppo" ) : nn::Module()
+        {
+            this->checkpoint_file = chkpt_dir + "/critic_torch_ppo.pt";
+            this->critic = nn::Sequential(
+                                    nn::Linear(input_dims, fc1_dims),
+                                    nn::ReLU(),
+                                    nn::Linear(fc1_dims, fc2_dims),
+                                    nn::ReLU(),
+                                    nn::Linear(fc2_dims, 1)
+            );
+            
+            this->optimizer = new optim::Adam(this->parameters(), optim::AdamOptions(alpha));
+            this->device = new T::Device(T::cuda::is_available() ? T::kCUDA : T::kCPU);
+            this->critic->to(*this->device);
+        }
+
+        T::Tensor forward(T::Tensor state)
+        {
+            return this->critic->forward(state);
+        }
+
+        void save_checkpoint()
+        {
+            T::serialize::OutputArchive output_archive;
+            this->critic->save(output_archive);
+            output_archive.save_to(this->checkpoint_file);
+        }
+
+        void load_checkpoint()
+        {
+            T::load(this->critic, this->checkpoint_file);
+        }
+
+
 };
