@@ -110,19 +110,19 @@ public:
     optim::Adam *optimizer;
     T::Device device;
 
-    ActorNetwork(long int n_actions, int input_dims, double alpha, long int fc1_dims, long int fc2_dims, string chkpt_dir = "./tmp/ppo") : Module()
+    ActorNetwork(long int n_actions, int input_dims, double alpha, long int fc1_dims, long int fc2_dims, string chkpt_dir = "../tmp/ppo") : Module()
     {
         this->checkpoint_file = chkpt_dir;
-        this->checkpoint_file += "/actor_torch_ppo";
+        this->checkpoint_file += "/actor_torch_ppo.pt";
         actor = nn::Sequential(
             nn::Linear(input_dims, fc1_dims),
             nn::ReLU(),
             nn::Linear(fc1_dims, fc2_dims),
             nn::ReLU(),
             nn::Linear(fc2_dims, n_actions),
-            nn::Softmax() // Comment on met dim = -1 en argument ?
+            nn::Softmax(-1) // Comment on met dim = -1 en argument ?
         );
-        this->optimizer = new optim::Adam(this->parameters(), torch::optim::AdamOptions(alpha));
+        this->optimizer = new optim::Adam(this->parameters(), T::optim::AdamOptions(alpha));
         this->device = T::kCPU;
         this->actor->to(device);
     }
