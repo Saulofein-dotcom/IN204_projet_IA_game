@@ -113,7 +113,7 @@ public:
     optim::Adam *optimizer;
     T::Device* device;
 
-    ActorNetwork(long int n_actions, int input_dims, double alpha, long int fc1_dims, long int fc2_dims, string chkpt_dir = "../tmp/ppo") : nn::Module()
+    ActorNetwork(long int n_actions, int input_dims, double alpha, long int fc1_dims=256, long int fc2_dims=256, string chkpt_dir = "../tmp/ppo") : nn::Module()
     {
         this->checkpoint_file = chkpt_dir;
         this->checkpoint_file += "/actor_torch_ppo.pt";
@@ -130,9 +130,11 @@ public:
         this->actor->to(*this->device);
     }
 
+    /*
     T::Tensor forward(T::Tensor input)
     {
     }
+    */
 
     void save_checkpoint()
     {
@@ -158,7 +160,7 @@ class CriticNetwork : public nn::Module
 
 
     public:
-        explicit CriticNetwork(long long input_dims, double alpha, long long fc1_dims=256, long long fc2_dims=256, string chkpt_dir="../tmp/ppo" ) : nn::Module()
+        CriticNetwork(long long input_dims, double alpha, long fc1_dims=256, long fc2_dims=256, string chkpt_dir="../tmp/ppo" ) : nn::Module()
         {
             this->checkpoint_file = chkpt_dir + "/critic_torch_ppo.pt";
             this->critic = nn::Sequential(
