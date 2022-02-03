@@ -1,29 +1,42 @@
 #include <torch/torch.h>
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include<vector>
+#include"ppo_torch.cpp"
+
+using namespace std;
+
+int generator()
+{
+    int n = 0;
+    return n + 2;
+
+}
 
 int main()
 {
-    torch::Tensor tensor = torch::eye(3);
-    std::cout << tensor << std::endl;
+    PPO_Memory ppo_memory(2);
+    ppo_memory.states = {2, 3, 4, 5, 6, 4, 5};
+    vector<float> x;
+    vector<double> c;
+    vector<float> v;
+    vector<float> b;
+    vector<double> f;
+    vector<double> g;
+    vector<vector<long long>> test;
+    tie(x, c, v, b, f, g, test) = ppo_memory.generate_batches();
+    
+    cout << test.size() << endl;
+    cout << x << endl;
 
-    sf::RenderWindow window(sf::VideoMode(200, 200), "SFML works!");
-    sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Green);
-
-    while (window.isOpen())
+    
+    /*
+    for(int i = 0; i < test.size(); i++)
     {
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed)
-                window.close();
-        }
-
-        window.clear();
-        window.draw(shape);
-        window.display();
+        cout << test[i] << endl;
     }
+    */
+    
 
     return 0;
 }

@@ -57,6 +57,9 @@
         "ranges": "cpp",
         "chrono": "cpp",
         "ratio": "cpp",
-        "numbers": "cpp"
+        "numbers": "cpp",
+        "bitset": "cpp",
+        "regex": "cpp",
+        "valarray": "cpp"
     }
 }
