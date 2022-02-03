@@ -3,3 +3,4 @@
 /libtorch
 /Sources/build
 /Sources/*.txt
+/Sources/test_critic.cpp
