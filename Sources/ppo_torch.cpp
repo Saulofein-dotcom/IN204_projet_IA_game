@@ -102,6 +102,9 @@ public:
     }
 };
 
+
+
+
 class ActorNetwork : public nn::Module
 {
 public:
@@ -110,7 +113,7 @@ public:
     optim::Adam *optimizer;
     T::Device* device;
 
-    ActorNetwork(long int n_actions, int input_dims, double alpha, long int fc1_dims, long int fc2_dims, string chkpt_dir = "../tmp/ppo") : Module()
+    ActorNetwork(long int n_actions, int input_dims, double alpha, long int fc1_dims, long int fc2_dims, string chkpt_dir = "../tmp/ppo") : nn::Module()
     {
         this->checkpoint_file = chkpt_dir;
         this->checkpoint_file += "/actor_torch_ppo.pt";
@@ -126,8 +129,16 @@ public:
         this->device = new T::Device(T::cuda::is_available() ? T::kCUDA : T::kCPU);
         this->actor->to(*this->device);
     }
+
     T::Tensor forward(T::Tensor input)
     {
+    }
+
+    void save_checkpoint()
+    {
+        T::serialize::OutputArchive output_archive;
+        this->actor->save(output_archive);
+        output_archive.save_to(this->checkpoint_file);
     }
 };
 
