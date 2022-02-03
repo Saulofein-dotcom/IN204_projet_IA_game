@@ -3,5 +3,5 @@
 /libtorch
 /Sources/build
 /Sources/*.txt
-/Sources/test_*.cpp
+/Sources/test_*
 /tmp

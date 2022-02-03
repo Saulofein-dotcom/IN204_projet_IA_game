@@ -178,7 +178,9 @@ class CriticNetwork : public nn::Module
 
         T::Tensor forward(T::Tensor state)
         {
-            return this->critic->forward(state);
+            T::Tensor tmp = this->critic->forward(state);
+            cout << tmp << endl;
+            return tmp;
         }
 
         void save_checkpoint()
@@ -243,11 +245,36 @@ class Agent
             this->critic->load_checkpoint();
         }
 
-        /*
-        auto choose_action(vector<double> observation)
+        
+        void choose_action(vector<double> observation)
         {
-            T::tensor state = T::tensor(observation);
+            T::Tensor state = T::tensor(observation, T::dtype(T::kFloat32)).to(*this->actor->device);
+            
+            T::Tensor dist = this->actor->actor->forward(state);
+            T::Tensor value = this->critic->critic->forward(state);
+            /*A COMPLETER*/
         }
-        */
+
+        void learn()
+        {
+            for(int NULL_VAR = 0; NULL_VAR < this->n_epochs; NULL_VAR++)
+            {
+                vector<double> state_arr; 
+                vector<double> action_arr;
+                vector<double> old_prob_arr; 
+                vector<double> vals_arr; 
+                vector<double> reward_arr; 
+                vector<double> dones_arr;
+                vector<vector<long long>> batches;
+
+                tie(state_arr, action_arr, old_prob_arr, vals_arr,
+                    reward_arr, dones_arr, batches) = this->memory->generate_batches();
+
+                auto values = vals_arr;
+                auto advantage = T::zeros(reward_arr.size(), T::dtype(T::kFloat32));
+                
+            }
+        }
+        
 
 };
