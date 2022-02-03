@@ -140,6 +140,11 @@ public:
         this->actor->save(output_archive);
         output_archive.save_to(this->checkpoint_file);
     }
+
+    void load_checkpoint()
+    {
+        T::load(this->actor, this->checkpoint_file);
+    }
 };
 
 class CriticNetwork : public nn::Module
