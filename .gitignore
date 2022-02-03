@@ -5,3 +5,4 @@
 /Sources/*.txt
 /Sources/test_*
 /tmp
+build.sh
