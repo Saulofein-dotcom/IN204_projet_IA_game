@@ -12,14 +12,15 @@ using namespace std;
 class PPO_Memory
 {
 public:
-    vector<double> states;
-    vector<double> probs;
-    vector<double> vals;
-    vector<double> actions;
-    vector<double> rewards;
-    vector<double> dones;
+    T::Tensor states;
+    T::Tensor probs;
+    T::Tensor vals;
+    T::Tensor actions;
+    T::Tensor rewards;
+    T::Tensor dones;
     long batch_size;
 
+    /*
     template <typename T>
     vector<T> arange(T begin, T end, int jump)
     {
@@ -32,6 +33,7 @@ public:
         }
         return myVector;
     }
+    */
 
     // random generator function:
     static int myrandom(int i) { return rand() % i; }
@@ -39,12 +41,12 @@ public:
 public:
     PPO_Memory(long batch_size)
     {
-        this->states = {};
-        this->probs = {};
-        this->vals = {};
-        this->actions = {};
-        this->rewards = {};
-        this->dones = {};
+        this->states = T::Tensor();
+        this->probs = T::Tensor();
+        this->vals = T::Tensor();
+        this->actions = T::Tensor();
+        this->rewards = T::Tensor();
+        this->dones = T::Tensor();
 
         this->batch_size = batch_size;
     }
@@ -53,23 +55,26 @@ public:
     {
         srand(time(NULL));
 
-        long long n_states = this->states.size();
+        long n_states = this->states.size(0);
 
-        vector<long long> batch_start = arange(0LL, n_states, this->batch_size);
+        T::Tensor batch_start = T::arange(0, n_states, this->batch_size);
 
-        vector<long long> indices = arange(0LL, n_states, 1);
+        T::Tensor indices = T::arange(0, n_states, 1);
 
-        random_shuffle(indices.begin(), indices.end(), myrandom);
+        T::Tensor random_indices = T::randperm(n_states);
 
-        vector<vector<long long>> batches = {};
-        for (auto const batch : batch_start)
+        indices = indices[random_indices];
+
+        T::Tensor batches;
+
+        for(int i = 0; i < batch_start.size(0); i++)
         {
-            vector<long long>::const_iterator first = indices.begin() + batch;
-            vector<long long>::const_iterator last;
-            indices.begin() + batch + batch_size < indices.end() ? last = indices.begin() + batch + batch_size : last = indices.end();
-
-            vector<long long> newVec(first, last);
-            batches.push_back(newVec);
+            T::Tensor newTensor = T::zeros(this->batch_size);
+            for(int j = 0; j < this->batch_size; j++)
+            {
+                newTensor[j] = indices[batch_start[i] + j];
+            }
+            batches = T::cat({batches, newTensor});
         }
 
         return make_tuple(this->states,
@@ -83,22 +88,22 @@ public:
 
     void store_memory(double state, double action, double probs, double vals, double reward, double done)
     {
-        this->states.push_back(state);
-        this->actions.push_back(action);
-        this->probs.push_back(probs);
-        this->vals.push_back(vals);
-        this->rewards.push_back(reward);
-        this->dones.push_back(done);
+        this->states = T::cat({this->states, T::tensor(state)});
+        this->actions = T::cat({this->states, T::tensor(action)});
+        this->probs = T::cat({this->states, T::tensor(probs)});
+        this->vals = T::cat({this->states, T::tensor(vals)});
+        this->rewards = T::cat({this->states, T::tensor(reward)});
+        this->dones = T::cat({this->states, T::tensor(done)});
     }
 
     void clear_memory()
     {
-        this->states = {};
-        this->actions = {};
-        this->probs = {};
-        this->vals = {};
-        this->rewards = {};
-        this->dones = {};
+        this->states = T::Tensor();
+        this->probs = T::Tensor();
+        this->vals = T::Tensor();
+        this->actions = T::Tensor();
+        this->rewards = T::Tensor();
+        this->dones = T::Tensor();
     }
 };
 
