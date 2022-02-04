@@ -65,7 +65,8 @@ public:
 
         if(this->states.size(0)==0)
         {
-            
+            cout << "Hmmm... Probleme" << endl;
+            //exit(0); 
         }
         else
         {
@@ -141,11 +142,15 @@ public:
         this->actor->to(*this->device);
     }
 
-    /*
-    T::Tensor forward(T::Tensor input)
+    
+    T::Tensor forward(T::Tensor state)
     {
+        T::Tensor dist = this->actor->forward(state);
+        
+        /*A COMPLETER*/
+        return dist;
     }
-    */
+    
 
     void save_checkpoint()
     {
@@ -189,6 +194,7 @@ class CriticNetwork : public nn::Module
 
         T::Tensor forward(T::Tensor state)
         {
+            //RETIRER LE COUT PLUS TARD
             T::Tensor tmp = this->critic->forward(state);
             cout << tmp << endl;
             return tmp;
