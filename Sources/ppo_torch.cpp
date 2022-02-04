@@ -266,13 +266,31 @@ class Agent
                 vector<double> reward_arr; 
                 vector<double> dones_arr;
                 vector<vector<long long>> batches;
+                
 
                 tie(state_arr, action_arr, old_prob_arr, vals_arr,
                     reward_arr, dones_arr, batches) = this->memory->generate_batches();
-
+                
                 auto values = vals_arr;
                 auto advantage = T::zeros(reward_arr.size(), T::dtype(T::kFloat32));
                 
+                for(int t = 0; t < reward_arr.size() - 1; t++)
+                {
+                    
+                    double discount = 1;
+                    double a_t = 0;
+                    for(int k = t; k < reward_arr.size() - 1; k++)
+                    { 
+                        cout << reward_arr[k] << endl;
+                        cout << "OK" << endl;
+                        a_t += discount*(reward_arr[k] + this->gamma*values[k+1]* (1 - (int) dones_arr[k]) - values[k]);
+                        
+                        discount *= this->gamma * this->gae_lambda;
+                    }
+                    advantage[t] = a_t;
+                }
+
+                advantage = advantage.to(*this->actor->device);
             }
         }
         
