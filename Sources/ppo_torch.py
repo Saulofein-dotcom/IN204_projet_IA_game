@@ -9,6 +9,7 @@ import subprocess
 import io
 import base64
 import json
+import time
 from itertools import cycle, count
 
 def get_gif_html(env_videos, title, subtitle_eps=None, max_n_videos=4):
@@ -97,7 +98,7 @@ class PPOMemory:
         
 class ActorNetwork(nn.Module):
     def __init__(self, n_actions, input_dims, alpha, fc1_dims=256,
-                fc2_dims=256, chkpt_dir="./tmp/ppo"):
+                fc2_dims=256, chkpt_dir="./tmp/ppopy"):
         super(ActorNetwork, self).__init__()
         
         self.checkpoint_file = os.path.join(chkpt_dir, 'actor_torch_ppo')
@@ -116,7 +117,11 @@ class ActorNetwork(nn.Module):
         
     def forward(self, state):
         dist = self.actor(state)
+        print(dist)
         dist = Categorical(dist)
+        a = T.Tensor([[0]])
+        print(dist.log_prob(a))
+        time.sleep(3)
         
         return dist
     
@@ -129,10 +134,10 @@ class ActorNetwork(nn.Module):
 
 class CriticNetwork(nn.Module):
     def __init__(self, input_dims, alpha, fc1_dims=256, fc2_dims=256,
-                chkpt_dir='./tmp/ppo'):
+                chkpt_dir='./tmp/ppopy'):
         super(CriticNetwork, self).__init__()
         
-        self.checkpoint_file = os.path.join(chkpt_dir, 'critic_torch_ppo.pt')
+        self.checkpoint_file = os.path.join(chkpt_dir, 'critic_torch_ppo')
         self.critic = nn.Sequential(
                     nn.Linear(*input_dims, fc1_dims),
                     nn.ReLU(),

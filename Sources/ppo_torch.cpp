@@ -3,11 +3,15 @@
 #include <algorithm>
 #include <time.h>
 #include <string>
+#include <random>
+#include <math.h>
 
 namespace T = torch;
 namespace nn = torch::nn;
 namespace optim = torch::optim;
 using namespace std;
+
+
 
 class PPO_Memory
 {
@@ -147,7 +151,6 @@ public:
     {
         T::Tensor dist = this->actor->forward(state);
         
-        /*A COMPLETER*/
         return dist;
     }
     
@@ -242,6 +245,32 @@ class Agent
 
         }
 
+        T::Tensor sampleAction(T::Tensor dist)
+        {
+            random_device rd;  // Will be used to obtain a seed for the random number engine
+            mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
+            uniform_real_distribution<> dis(0.0, 1.0);
+
+            double random_number = dis(gen);
+
+            T::Tensor action = T::tensor({0});
+            float tmp = 0;
+
+            bool done = false;
+            for(int i = 0; i < dist.size(1) && !done; i++)
+            {
+                tmp += dist[0][i].item<double>();
+                if(random_number<=tmp)
+                {
+                    action[0] = i;
+                    done = true;
+                }
+
+            }
+
+            return action;
+        }
+
         
         void remember(auto state, auto action, auto probs, auto vals, auto reward, auto done)
         {
@@ -265,11 +294,32 @@ class Agent
         
         void choose_action(T::Tensor observation)
         {
-            //T::Tensor state = T::tensor(observation, T::dtype(T::kFloat32)).to(*this->actor->device);
+            cout << "value" << endl;
+            T::Tensor state = observation.to(*this->actor->device);
             
-            //T::Tensor dist = this->actor->actor->forward(state);
-            //T::Tensor value = this->critic->critic->forward(state);
-            /*A COMPLETER*/
+            
+            T::Tensor dist = this->actor->actor->forward(state);
+            T::Tensor value = this->critic->critic->forward(state);
+            
+            T::Tensor action;
+
+            
+            
+        
+            if(dist.size(0)==0 || dist.size(-1)==0 )
+            {
+
+            }else
+            {
+                /*
+                action = this->sampleAction(dist);
+                auto logAction = log(dist[0][action]);
+                */
+            }
+            
+            //c10::Scalar actionReturn = T::squeeze(action).item();
+            c10::Scalar valueReturn = T::squeeze(value).item();
+
         }
 
         void learn()

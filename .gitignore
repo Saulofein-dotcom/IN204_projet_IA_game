@@ -6,3 +6,5 @@
 /Sources/test_*
 /tmp
 build.sh
+/Sources/ppopy/
+/Sources/plots
