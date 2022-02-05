@@ -9,6 +9,7 @@ import base64
 import subprocess
 import json
 import tempfile
+import time
 from gym import wrappers
 
 def get_make_env_fn(**kargs):
@@ -41,6 +42,7 @@ def get_make_env_fn(**kargs):
 
 if __name__ == '__main__':
     env = gym.make('CartPole-v0')
+    
     N = 20
     batch_size = 5
     n_epochs = 4
@@ -56,11 +58,14 @@ if __name__ == '__main__':
     figure_file = "./plots/cartpole.png"
     
     best_score = env.reward_range[0]
+    print(best_score)
     score_history = []
 
     learn_iters = 0
     avg_score = 0
-    n_steps = 0    
+    n_steps = 0   
+
+
 
     for i in range(n_games):
         observation = env.reset()
@@ -68,6 +73,9 @@ if __name__ == '__main__':
         score = 0
         while not done:
             action, prob, val = agent.choose_action(observation)
+            print(action)
+            print(prob)
+            print(val)
             observation_, reward, done, info = env.step(action)
             n_steps += 1
             score += reward
