@@ -117,11 +117,7 @@ class ActorNetwork(nn.Module):
         
     def forward(self, state):
         dist = self.actor(state)
-        print(dist)
         dist = Categorical(dist)
-        a = T.Tensor([[0]])
-        print(dist.log_prob(a))
-        time.sleep(3)
         
         return dist
     
