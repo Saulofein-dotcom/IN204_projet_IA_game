@@ -40,7 +40,7 @@ public:
     */
 
     // random generator function:
-    static int myrandom(int i) { return rand() % i; }
+    //static int myrandom(int i) { return rand() % i; }
 
 public:
     PPO_Memory(long batch_size)
@@ -69,7 +69,7 @@ public:
 
         if(this->states.size(0)==0)
         {
-            cout << "Hmmm... Probleme" << endl;
+            cout << "states of size 0" << endl;
             //exit(0); 
         }
         else
@@ -268,7 +268,7 @@ class Agent
 
             }
 
-            cout << "doneSample" << endl;
+            cout << "sample_done" << endl;
 
             return action;
         }
@@ -284,6 +284,7 @@ class Agent
             cout << "...saving models..." << endl;
             this->actor->save_checkpoint();
             this->critic->save_checkpoint();
+            cout << "...models saved..." << endl;
         }
 
         void load_models()
@@ -291,12 +292,13 @@ class Agent
             cout << "...loading models..." << endl;
             this->actor->load_checkpoint();
             this->critic->load_checkpoint();
+            cout << "...models loaded..." << endl;
         }
 
         
         auto choose_action(T::Tensor observation)
         {
-            cout << "value" << endl;
+            
             T::Tensor state = observation.to(*this->actor->device);
             
             
@@ -337,10 +339,10 @@ class Agent
                 tie(state_arr, action_arr, old_prob_arr, vals_arr,
                     reward_arr, dones_arr, batches) = this->memory->generate_batches();
                 
-                cout << "ok1" << endl; 
+                cout << "batch generated" << endl; 
                 T::Tensor values = vals_arr;
                 T::Tensor advantage = T::zeros(reward_arr.size(0), T::dtype(T::kFloat32));
-                cout << "ok2" << endl; 
+                
                 
                 for(int t = 0; t < reward_arr.size(0) - 1; t++)
                 {
@@ -349,7 +351,7 @@ class Agent
                     double a_t = 0;
                     for(int k = t; k < reward_arr.size(0) - 1; k++)
                     { 
-                        cout << "ok3" << endl; 
+                        
                         
                         a_t += discount*(reward_arr[k].item<double>() + this->gamma*values[k+1].item<double>() * (1 - dones_arr[k].item<long>()) - values[k].item<double>());
                         
@@ -358,35 +360,36 @@ class Agent
                     }
                     advantage[t] = a_t;
                 }
-                cout << "ok4" << endl; 
+                cout << "advantage updated" << endl; 
                 
                 advantage.size(0)==0 ? advantage = advantage : advantage = advantage.data().to(*this->actor->device);
                 values.size(0)==0 ? values = values : values = values.data().to(*this->actor->device);
-                cout << "ok5" << endl; 
+                cout << "values and advantage updated" << endl; 
 
                 for(int i = 0; i < batches.size(0) ; i++)
                 {
                     T::Tensor batch = batches[i];
-                    cout << "ok6" << endl; 
                     T::Tensor states = state_arr[batch].to(*this->actor->device);
                     T::Tensor old_probs = old_prob_arr[batch].to(*this->actor->device);
                     T::Tensor actions = action_arr[batch].to(*this->actor->device);
 
-                    cout << "ok7" << endl; 
+                    cout << "loop_1" << endl; 
                     T::Tensor dist = this->actor->actor->forward(states);
                     T::Tensor critic_value = this->critic->critic->forward(states);
 
                     critic_value = T::squeeze(critic_value);
-                    cout << "ok8" << endl; 
-                    T::Tensor new_probs;//A COMPLETER
+                    cout << "loop_2" << endl; 
+                    
+                    T::Tensor new_probs = log(dist[actions]);
                     T::Tensor prob_ratio = new_probs.exp() / old_probs.exp();
-                    cout << "ok9" << endl; 
+                    cout << "loop_3" << endl; 
                     T::Tensor weighted_probs = advantage[batch] * prob_ratio;
                     T::Tensor weighted_clipped_probs = T::clamp(prob_ratio, 1 - this->policy_clip, 1 + this->policy_clip) * advantage[batch];
                     T::Tensor actor_loss = -T::min(weighted_probs, weighted_clipped_probs).mean();
                     T::Tensor returns = advantage[batch] + values[batch];
                     T::Tensor critic_loss = (returns - critic_value)*(returns - critic_value);
                     critic_loss = critic_loss.mean();
+                    cout << "loop_4" << endl; 
 
                     T::Tensor total_loss = actor_loss + 0.5 * critic_loss;
                     this->actor->optimizer->zero_grad();
@@ -394,6 +397,7 @@ class Agent
                     total_loss.backward();
                     this->actor->optimizer->step();
                     this->critic->optimizer->step();
+                    cout << "loop_5" << endl; 
                 }
                 
             }
