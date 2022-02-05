@@ -268,6 +268,8 @@ class Agent
 
             }
 
+            cout << "doneSample" << endl;
+
             return action;
         }
 
@@ -292,7 +294,7 @@ class Agent
         }
 
         
-        void choose_action(T::Tensor observation)
+        auto choose_action(T::Tensor observation)
         {
             cout << "value" << endl;
             T::Tensor state = observation.to(*this->actor->device);
@@ -300,25 +302,23 @@ class Agent
             
             T::Tensor dist = this->actor->actor->forward(state);
             T::Tensor value = this->critic->critic->forward(state);
+            c10::Scalar probsReturn;
             
-            T::Tensor action;
+            long action;
 
-            
-            
-        
             if(dist.size(0)==0 || dist.size(-1)==0 )
             {
-
             }else
             {
-                /*
-                action = this->sampleAction(dist);
-                auto logAction = log(dist[0][action]);
-                */
+                action = this->sampleAction(dist).item<long>();
+                double logAction = log(dist[-1][action]).item<double>();
+                probsReturn = T::squeeze(T::tensor({logAction})).item();
             }
             
-            //c10::Scalar actionReturn = T::squeeze(action).item();
+            c10::Scalar actionReturn = T::squeeze(T::tensor(action)).item();
             c10::Scalar valueReturn = T::squeeze(value).item();
+
+            return make_tuple(actionReturn, probsReturn, valueReturn);
 
         }
 
