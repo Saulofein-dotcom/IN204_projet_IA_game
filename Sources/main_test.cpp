@@ -119,7 +119,7 @@ int main()
 
         vector<double> *pngData = ConvertToPNG(imageRef->image);
 
-        WriteToFile(pngData, "plotMain.png");
+        WriteToFile(pngData, "../create_plot/plotScore.png");
         DeleteImage(imageRef->image);
         delete error;
         
