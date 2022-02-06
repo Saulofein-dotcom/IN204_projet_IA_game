@@ -16,6 +16,7 @@ void Player::initTexture()
         std::cout << "ERROR::PLAYER::INITTEXTURE::Could not load texture file" << std::endl;
     }
     // Same for sword
+    
     if (!this->swordTexture.loadFromFile("../../Textures/sword.png"))
     {
         std::cout << "ERROR::PLAYER::INITTEXTURE::Could not load texture file" << std::endl;
@@ -70,16 +71,18 @@ Player::~Player()
 // Functions
 void Player::renderPlayer(RenderTarget &target)
 {
-    target.draw(this->swordSprite);
+    //target.draw(this->swordSprite);
     target.draw(this->sprite);
 }
 
 void Player::renderFireballs(RenderTarget &target)
 {
+    
     for (auto *fireball : this->fireballs)
     {
         fireball->renderFireball(target);
     }
+    
 }
 
 void Player::move(const float dirX, const float dirY)
@@ -153,6 +156,7 @@ void Player::update()
         this->move(1.f, 0.f);
 
     // Update tire de fireball
+    /*
     if (Mouse::isButtonPressed(Mouse::Left) && this->canAttack())
     {
         this->shootFireballs();
@@ -168,6 +172,7 @@ void Player::update()
 
     // Update sword rotation
     this->updateSwordRotation();
+    */
 }
 
 const bool Player::canAttack()
