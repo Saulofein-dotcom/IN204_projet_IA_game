@@ -3,6 +3,10 @@
 #include <algorithm>
 #include <vector>
 #include"ppo_torch.cpp"
+#include "./create_plot/pbPlots.hpp"
+#include "./create_plot/supportLib.hpp"
+
+
 
 using namespace std;
 
@@ -33,7 +37,7 @@ int main()
     mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
     uniform_real_distribution<> dis(-0.05, 0.05);
 
-    
+    RGBABitmapImageReference *imageRef = CreateRGBABitmapImageReference();
 
     Agent agent = Agent(3, observation_space_shape, gamma, alpha, gae_lambda, policy_clip, batch_size, n_epochs);
     int n_games = 300;
@@ -90,7 +94,35 @@ int main()
 
         cout << "episode " << i << " score "<< score << ", avg_score : " << avg_score
                 << ", time steps " << n_steps << ", learning_steps " << learn_iters << endl;
+
+        /*================ PLOT SCORE =================*/
+
+        vector<double> x(score_history.size());
+        for(int l = 0; l < score_history.size(); l++)
+        {
+            x[l] = l+1;
+        }
         
+        vector<double> running_avg(score_history.size());
+        for(int m = 0; m < running_avg.size(); m++)
+        {
+            int tmpMax;
+            m - 100 > 0 ? tmpMax = m-100 : tmpMax = 0;
+
+            vector<int64_t> score_tmp_run(score_history.begin() + tmpMax, score_history.begin() + m + 1);
+            running_avg[m] = average(score_tmp_run);
+            
+        }
+        cout << running_avg << endl;
+
+        StringReference* error = new StringReference();
+        DrawScatterPlot(imageRef, 600, 400, &x, &running_avg, error);
+
+        vector<double> *pngData = ConvertToPNG(imageRef->image);
+
+        WriteToFile(pngData, "plotMain.png");
+        DeleteImage(imageRef->image);
+        delete error;
         
     }
 
