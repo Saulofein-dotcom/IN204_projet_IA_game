@@ -39,7 +39,7 @@ int main()
 
     RGBABitmapImageReference *imageRef = CreateRGBABitmapImageReference();
 
-    Agent agent = Agent(3, observation_space_shape, gamma, alpha, gae_lambda, policy_clip, batch_size, n_epochs);
+    Agent agent = Agent(action_space_n, observation_space_shape, gamma, alpha, gae_lambda, policy_clip, batch_size, n_epochs);
     int n_games = 300;
 
     string figure_file = ".plots/cartpole.png";
@@ -113,7 +113,6 @@ int main()
             running_avg[m] = average(score_tmp_run);
             
         }
-        cout << running_avg << endl;
 
         StringReference* error = new StringReference();
         DrawScatterPlot(imageRef, 600, 400, &x, &running_avg, error);
