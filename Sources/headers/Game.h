@@ -6,6 +6,7 @@
 #include <sstream>
 #include <iostream>
 #include <iomanip>
+#include<vector>
 
 #include "../../SFML-2.5.1/include/SFML/Graphics.hpp"
 
@@ -70,6 +71,9 @@ public:
     void renderWorld();
 
     void triggerEndOfGame();
+
+    Image saveImage();
+    std::vector<std::vector<unsigned>> imageToVectorC(unsigned width, unsigned height, Image myImage);
 
     // Accessors
     std::vector<Enemy *> getEnemies();

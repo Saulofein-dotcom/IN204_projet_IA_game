@@ -1,4 +1,7 @@
 #include "headers/Game.h"
+#include<omp.h>
+
+using namespace std;
 
 void Game::initWindow()
 {
@@ -72,7 +75,7 @@ Game::Game()
 {
 	this->initWindow();
 	this->initWorld();
-	this->initGUI();
+	//this->initGUI();
 	this->initPlayer();
 	this->initClock();
 	this->initEnemies();
@@ -96,17 +99,25 @@ Game::~Game()
 
 void Game::run()
 {
+	int frame = 0;
 	while (this->window->isOpen())
 	{
 		this->update();
 		this->render();
+
+		Image imageCapture = this->saveImage();
+		std::vector<std::vector<unsigned>> compressedImage = imageToVectorC(100, 100, imageCapture);
+
+
+		
+		exit(0);
 	}
 }
 
 void Game::update()
 {
 	this->updateClock();
-	this->updateGUI();
+	//this->updateGUI();
 	this->updatePollEvents();
 	this->updatePlayer();
 	this->updateEnemies();
@@ -323,8 +334,48 @@ void Game::render()
 	}
 
 	// Draw the GUI
-	this->renderGUI();
+	//this->renderGUI();
 
 	// Render
 	this->window->display();
+}
+
+Image Game::saveImage()
+{
+	sf::Texture texture;
+	texture.create(this->window->getSize().x, this->window->getSize().y);
+	texture.update(*this->window);
+	return texture.copyToImage();
+}
+
+std::vector<std::vector<unsigned>> Game::imageToVectorC(unsigned width, unsigned height, Image myImage)
+{
+	std::vector<std::vector<unsigned>> myVectorImage(width, std::vector<unsigned>(height, 0));
+
+	Image test;
+	test.create(width, height); 
+
+	Vector2u sizeOriginal = myImage.getSize();
+	unsigned x_step = sizeOriginal.x / width;
+	unsigned y_step = sizeOriginal.y / width;
+
+	#pragma omp parallel for
+	for(int i = 0; i < width; i++)
+	{
+		for(int j = 0; j < height; j++)
+		{
+			unsigned red = myImage.getPixel(x_step*i, y_step*j).r;
+			unsigned green = myImage.getPixel(x_step*i, y_step*j).g;
+			unsigned blue = myImage.getPixel(x_step*i, y_step*j).b;
+			unsigned gray = (red + green + blue) / 3;
+
+			myVectorImage[i][j] = gray;
+			test.setPixel(i, j, Color(gray, gray, gray));
+		}
+	}
+	cout << myVectorImage[0][0] << endl;
+	test.saveToFile("testImage.png");
+
+	return myVectorImage;
+
 }
