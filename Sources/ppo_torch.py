@@ -202,6 +202,9 @@ class Agent:
             state_arr, action_arr, old_prob_arr, vals_arr,\
             reward_arr, dones_arr, batches = \
             self.memory.generate_batches()
+
+            
+            
             
             values = vals_arr
             advantage = np.zeros(len(reward_arr), dtype=np.float32)
@@ -218,6 +221,9 @@ class Agent:
             advantage = T.tensor(advantage).to(self.actor.device)
             
             values = T.tensor(values).to(self.actor.device)
+
+            
+            
             for batch in batches:
                 states = T.tensor(state_arr[batch], dtype=T.float).to(self.actor.device)
                 old_probs = T.tensor(old_prob_arr[batch]).to(self.actor.device)
@@ -228,6 +234,7 @@ class Agent:
                 
                 critic_value = T.squeeze(critic_value)
                 
+                
                 new_probs = dist.log_prob(actions)
                 prob_ratio = new_probs.exp() / old_probs.exp()
                 weighted_probs = advantage[batch] * prob_ratio
@@ -237,6 +244,7 @@ class Agent:
                 returns = advantage[batch] + values[batch]
                 critic_loss = (returns-critic_value)**2
                 critic_loss = critic_loss.mean()
+                
                 
                 total_loss = actor_loss + 0.5*critic_loss
                 self.actor.optimizer.zero_grad()

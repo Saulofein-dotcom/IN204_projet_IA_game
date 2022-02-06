@@ -41,7 +41,7 @@ def get_make_env_fn(**kargs):
     return make_env_fn, kargs
 
 if __name__ == '__main__':
-    env = gym.make('CartPole-v0')
+    env = gym.make('SpaceInvaders-v0')
     
     N = 20
     batch_size = 5
@@ -73,9 +73,6 @@ if __name__ == '__main__':
         score = 0
         while not done:
             action, prob, val = agent.choose_action(observation)
-            print(action)
-            print(prob)
-            print(val)
             observation_, reward, done, info = env.step(action)
             n_steps += 1
             score += reward
