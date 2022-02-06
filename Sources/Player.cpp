@@ -175,6 +175,19 @@ void Player::update()
     */
 }
 
+void Player::update(int action)
+{
+    // Update Position
+    if (action == 0) // haut
+        this->move(0.f, -1.f);
+    if (action == 1) // gauche
+        this->move(-1.f, 0.f);
+    if (action == 2) // bas
+        this->move(0.f, 1.f);
+    if (action == 3) // droite
+        this->move(1.f, 0.f);
+}
+
 const bool Player::canAttack()
 {
     if (this->attackCoolDown >= attackCoolDownMax)

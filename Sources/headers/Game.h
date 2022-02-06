@@ -7,6 +7,7 @@
 #include <iostream>
 #include <iomanip>
 #include<vector>
+#include <algorithm>
 
 #include "../../SFML-2.5.1/include/SFML/Graphics.hpp"
 
@@ -39,6 +40,7 @@ private:
     sf::Text timeText;
 
     sf::Text gameOverText; // Unused because not useful for AI
+    bool end = false;
 
     // Time
     Clock clock;
@@ -59,10 +61,10 @@ public:
     // Fonctions
     void run();
 
-    void update();
+    void update(int a);
     void updatePollEvents();
     void updateEnemies();
-    void updatePlayer();
+    void updatePlayer(int a);
     void updateGUI();
     void updateClock();
 
@@ -73,7 +75,9 @@ public:
     void triggerEndOfGame();
 
     Image saveImage();
-    std::vector<std::vector<unsigned>> imageToVectorC(unsigned width, unsigned height, Image myImage);
+    std::vector<unsigned> imageToVectorC(unsigned width, unsigned height, Image myImage);
+
+    auto step(int action, int stackFrame);
 
     // Accessors
     std::vector<Enemy *> getEnemies();

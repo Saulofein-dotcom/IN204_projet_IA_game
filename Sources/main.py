@@ -1,6 +1,7 @@
 import gym
 from matplotlib.pyplot import figure
 import numpy as np
+import torch.nn as nn
 from ppo_torch import Agent
 from utils import plot_learning_curve
 import os
@@ -41,7 +42,9 @@ def get_make_env_fn(**kargs):
     return make_env_fn, kargs
 
 if __name__ == '__main__':
-    env = gym.make('SpaceInvaders-v0')
+    env = gym.make('CartPole-v0')
+
+    
     
     N = 20
     batch_size = 5
@@ -51,7 +54,7 @@ if __name__ == '__main__':
 
     agent = Agent(n_actions=env.action_space.n, batch_size=batch_size,
                     alpha=alpha, n_epochs=n_epochs,
-                    input_dims=env.observation_space.shape,
+                    input_dims=(10,2),
                     make_env_fn=make_env_fn, make_env_kargs=make_env_kargs)
     n_games = 300
 
@@ -65,6 +68,7 @@ if __name__ == '__main__':
     avg_score = 0
     n_steps = 0   
 
+    
 
 
     for i in range(n_games):

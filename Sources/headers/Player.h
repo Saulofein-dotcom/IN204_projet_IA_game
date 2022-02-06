@@ -46,6 +46,7 @@ public:
 
     // Functions
     void update();
+    void update(int action);
     void updateFireballs();
     void updateAttack();
     void updateSwordRotation();

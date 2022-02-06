@@ -51,7 +51,7 @@ int main()
     double avg_score = 0;
     long n_steps = 0;
 
-    for(int i = 0; i < n_games ; i++)
+    for(int i = 0; i < 0/*n_games*/ ; i++)
     {
         T::Tensor observation = T::tensor({{dis(gen),dis(gen),dis(gen),dis(gen)}});
         bool done = false;
@@ -124,6 +124,11 @@ int main()
         delete error;
         
     }
+
+    /* ---- A SUPPRIMER ---- */
+    
+
+    /*-----------------------*/
 
     return 0;
 }
