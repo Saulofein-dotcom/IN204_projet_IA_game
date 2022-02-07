@@ -258,8 +258,11 @@ class Agent
             this->n_epochs = n_epochs;
             this->gae_lambda = gae_lambda;
 
-            this->actor = new ActorNetwork(n_actions, input_dims, alpha);
-            this->critic = new CriticNetwork(input_dims, alpha);
+            int fc1_dims = 4096;
+            int fc2_dims = 4096;
+
+            this->actor = new ActorNetwork(n_actions, input_dims, alpha, fc1_dims, fc2_dims);
+            this->critic = new CriticNetwork(input_dims, alpha, fc1_dims, fc2_dims);
             this->memory = new PPO_Memory(batch_size);
 
         }

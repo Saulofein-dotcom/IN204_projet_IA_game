@@ -19,11 +19,12 @@ double average(std::vector<A> const& v){
     return std::reduce(v.begin(), v.end()) / count;
 }
 
-auto Game::step(int action, int stackFrame, int width, int height)
+auto Game::step(int action, int stackFrame, int width, int height, int nbColors)
 {
-	vector<double> state(stackFrame*width*height);
+	vector<double> state(stackFrame*width*height*nbColors);
 	double reward;
 	int a = action;
+	/*
 	for(int i = 0; i < stackFrame; i++)
 	{
 		
@@ -34,6 +35,13 @@ auto Game::step(int action, int stackFrame, int width, int height)
 		std::vector<unsigned> compressedImage = imageToVectorC(width, height, imageCapture);
 		copy(compressedImage.begin(), compressedImage.end(), state.begin() + i*compressedImage.size());
 	}
+	*/
+	this->update(a);
+	this->render();
+	
+	Image imageCapture = this->saveImage();
+	std::vector<unsigned> compressedImage = imageToVectorC(width, height, imageCapture);
+	copy(compressedImage.begin(), compressedImage.end(), state.begin() + i*compressedImage.size());
 	this->end ? reward = -100.0 : reward = 1.0;
 	return make_tuple(T::tensor(state).unsqueeze(0),reward , this->end);
 }
@@ -137,11 +145,12 @@ Game::~Game()
 
 void Game::run()
 {
-	int width = 100;
-	int height = 100;
+	int width = 10;
+	int height = 10;
 	int frame = 0;
 	int stackNumber = 5;
-	vector<double> state(stackNumber*width*height);
+	int nbColors = 3;
+	vector<double> state(stackNumber*width*height*nbColors);
 
 	random_device rd;  // Will be used to obtain a seed for the random number engine
     mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
@@ -151,7 +160,7 @@ void Game::run()
     int n_epochs = 5;
     double alpha = 0.0001;
     int action_space_n = 9;
-    int observation_space_shape = stackNumber * width * height;
+    int observation_space_shape = stackNumber * width * height * nbColors;
     double gamma = 0.99;
     double gae_lambda = 0.95;
     double policy_clip = 0.2;
@@ -199,18 +208,22 @@ void Game::run()
 			
             c10::Scalar action ,prob, val;
             tie(action, prob, val) = agent.choose_action(observation);
+			
 
             double reward;
 			
+			
             T::Tensor observation_;
-			tie(observation_, reward, done) = step(action.to<int>(), stackNumber, width, height);
+			tie(observation_, reward, done) = step(action.to<int>(), stackNumber, width, height, nbColors);
             n_steps += 1;
             score += reward;
             
+			
             agent.remember(observation, action, prob, val, reward, done);
 			
             if(n_steps % N == 0)
             {
+				
                 agent.learn();
                 learn_iters += 1;
             }
@@ -528,7 +541,9 @@ Image Game::saveImage()
 
 std::vector<unsigned> Game::imageToVectorC(unsigned width, unsigned height, Image myImage)
 {
-	std::vector<unsigned> myVectorImage(width * height);
+	//std::vector<unsigned> myVectorImage(width * height);
+	std::vector<unsigned> myVectorImageColored(width * height*3);
+
 
 	//Image test;
 	//test.create(width, height); 
@@ -538,21 +553,25 @@ std::vector<unsigned> Game::imageToVectorC(unsigned width, unsigned height, Imag
 	unsigned y_step = sizeOriginal.y / width;
 
 	#pragma omp parallel for
-	for(int i = 0; i < width; i++)
+	for(int j = 0; j < height; j++)
 	{
-		for(int j = 0; j < height; j++)
+		for(int i = 0; i < width; i++)
 		{
 			unsigned red = myImage.getPixel(x_step*i, y_step*j).r;
 			unsigned green = myImage.getPixel(x_step*i, y_step*j).g;
 			unsigned blue = myImage.getPixel(x_step*i, y_step*j).b;
-			unsigned gray = (red + green + blue) / 3;
+			//unsigned gray = (red + green + blue) / 3;
 
-			myVectorImage[i * width + j] = gray;
-			//test.setPixel(i, j, Color(gray, gray, gray));
+			myVectorImageColored[3 * j * width + 3 * i] = red;
+			myVectorImageColored[3 * j * width + 3 * i + 1] = green;
+			myVectorImageColored[3 * j * width + 3 * i + 2] = blue;
+
+			//myVectorImage[i * width + j] = gray;
+			//test.setPixel(i, j, Color(red, green, blue));
 		}
 	}
 	//test.saveToFile("../testImage.png");
 
-	return myVectorImage;
+	return myVectorImageColored;
 
 }
