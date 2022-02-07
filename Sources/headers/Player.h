@@ -33,7 +33,7 @@ private:
     void initVariables();
     void initTexture();
     void initCoolDowns();
-    void initPosition();
+    
 
 public:
     // Constructors and Destructors
@@ -43,6 +43,8 @@ public:
 
     // Public Variables
     std::vector<Fireball *> fireballs;
+
+    void initPosition();
 
     // Functions
     void update();

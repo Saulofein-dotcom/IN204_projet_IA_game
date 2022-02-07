@@ -77,7 +77,9 @@ public:
     Image saveImage();
     std::vector<unsigned> imageToVectorC(unsigned width, unsigned height, Image myImage);
 
-    auto step(int action, int stackFrame);
+    auto step(int action, int stackFrame, int width, int height);
+
+    void resetGame();
 
     // Accessors
     std::vector<Enemy *> getEnemies();

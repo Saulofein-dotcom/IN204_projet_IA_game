@@ -19,9 +19,9 @@ double average(std::vector<A> const& v){
     return std::reduce(v.begin(), v.end()) / count;
 }
 
-auto Game::step(int action, int stackFrame)
+auto Game::step(int action, int stackFrame, int width, int height)
 {
-	vector<double> state(stackFrame*100*100);
+	vector<double> state(stackFrame*width*height);
 	double reward;
 	int a = action;
 	for(int i = 0; i < stackFrame; i++)
@@ -31,7 +31,7 @@ auto Game::step(int action, int stackFrame)
 		this->render();
 
 		Image imageCapture = this->saveImage();
-		std::vector<unsigned> compressedImage = imageToVectorC(100, 100, imageCapture);
+		std::vector<unsigned> compressedImage = imageToVectorC(width, height, imageCapture);
 		copy(compressedImage.begin(), compressedImage.end(), state.begin() + i*compressedImage.size());
 	}
 	this->end ? reward = -100.0 : reward = 1.0;
@@ -74,10 +74,10 @@ void Game::initEnemies()
 	/*
 	Initialize variables of the enemies
 	*/
-	this->spawnTimerMax = 25.f;
+	this->spawnTimerMax = 12.f;
 	this->spawnTimer = this->spawnTimerMax;
 
-	this->spawnTimerMaxRock = 50.f;
+	this->spawnTimerMaxRock = 35.f;
 	this->spawnTimerRock = this->spawnTimerMaxRock;
 }
 
@@ -137,19 +137,21 @@ Game::~Game()
 
 void Game::run()
 {
+	int width = 100;
+	int height = 100;
 	int frame = 0;
-	int stackNumber = 4;
-	vector<double> state(stackNumber*100*100);
+	int stackNumber = 5;
+	vector<double> state(stackNumber*width*height);
 
 	random_device rd;  // Will be used to obtain a seed for the random number engine
     mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
     uniform_real_distribution<> dis(-0.05, 0.05);
-	int N = 20;
-    int batch_size = 64;
-    int n_epochs = 10;
-    double alpha = 0.0003;
-    int action_space_n = 4;
-    int observation_space_shape = stackNumber * 100 * 100;
+	int N = 10;
+    int batch_size = 32;
+    int n_epochs = 5;
+    double alpha = 0.0001;
+    int action_space_n = 5;
+    int observation_space_shape = stackNumber * width * height;
     double gamma = 0.99;
     double gae_lambda = 0.95;
     double policy_clip = 0.2;
@@ -157,11 +159,11 @@ void Game::run()
 	RGBABitmapImageReference *imageRef = CreateRGBABitmapImageReference();
 
 	Agent agent = Agent(action_space_n, observation_space_shape, gamma, alpha, gae_lambda, policy_clip, batch_size, n_epochs);
-	int n_games = 10000;
+	int n_games = 3000;
 
 	vector<long> score_history;
     
-    double best_score = std::numeric_limits<double>::min();
+    double best_score = -100000;
     long learn_iters = 0;
     double avg_score = 0;
     long n_steps = 0;
@@ -169,11 +171,13 @@ void Game::run()
 	for(int i = 0; i < n_games ; i++)
     {
 		int time = 0;
-		
+		this->resetGame();
 		
         bool done = false;
 		this->end = false;
 		frame = 0;
+
+		
 
 		while(frame < stackNumber)
 		{
@@ -181,7 +185,7 @@ void Game::run()
 			this->render();
 
 			Image imageCapture = this->saveImage();
-			std::vector<unsigned> compressedImage = imageToVectorC(100, 100, imageCapture);
+			std::vector<unsigned> compressedImage = imageToVectorC(width, height, imageCapture);
 			copy(compressedImage.begin(), compressedImage.end(), state.begin() + frame*compressedImage.size());
 			
 			frame++;
@@ -197,12 +201,14 @@ void Game::run()
             tie(action, prob, val) = agent.choose_action(observation);
 
             double reward;
+			
             T::Tensor observation_;
-			tie(observation_, reward, done) = step(action.to<int>(), stackNumber);
+			tie(observation_, reward, done) = step(action.to<int>(), stackNumber, width, height);
             n_steps += 1;
             score += reward;
             
             agent.remember(observation, action, prob, val, reward, done);
+			
             if(n_steps % N == 0)
             {
                 agent.learn();
@@ -231,7 +237,7 @@ void Game::run()
         }
 
         cout << "episode " << i << " score "<< score << ", avg_score : " << avg_score
-                << ", time steps " << n_steps << ", learning_steps " << learn_iters << endl;
+                << ", time steps " << n_steps << ", learning_steps " << learn_iters << ", temps : "<< time <<  endl;
 
         /*================ PLOT SCORE =================*/
 
@@ -494,6 +500,24 @@ void Game::render()
 	this->window->display();
 }
 
+void Game::resetGame()
+{
+	for(int k = 0; k < this->enemiesRock.size(); k++)
+	{
+		
+		delete this->enemiesRock.at(k);
+	}
+	for(int k = 0; k < this->enemies.size(); k++)
+	{
+		
+		delete this->enemies.at(k);
+		
+	}
+	this->enemies.clear();
+	this->enemiesRock.clear();
+	this->player->initPosition();
+}
+
 Image Game::saveImage()
 {
 	sf::Texture texture;
@@ -506,8 +530,8 @@ std::vector<unsigned> Game::imageToVectorC(unsigned width, unsigned height, Imag
 {
 	std::vector<unsigned> myVectorImage(width * height);
 
-	Image test;
-	test.create(width, height); 
+	//Image test;
+	//test.create(width, height); 
 
 	Vector2u sizeOriginal = myImage.getSize();
 	unsigned x_step = sizeOriginal.x / width;
@@ -524,10 +548,10 @@ std::vector<unsigned> Game::imageToVectorC(unsigned width, unsigned height, Imag
 			unsigned gray = (red + green + blue) / 3;
 
 			myVectorImage[i * width + j] = gray;
-			test.setPixel(i, j, Color(gray, gray, gray));
+			//test.setPixel(i, j, Color(gray, gray, gray));
 		}
 	}
-	test.saveToFile("testImage.png");
+	//test.saveToFile("../testImage.png");
 
 	return myVectorImage;
 

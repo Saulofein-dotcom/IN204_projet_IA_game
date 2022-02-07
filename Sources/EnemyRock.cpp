@@ -19,7 +19,7 @@ void EnemyRock::initTexture()
 	}
 
 	this->textureShadow = new Texture();
-	if (!this->textureShadow->loadFromFile("../../Textures/rockShadow.png"))
+	if (!this->textureShadow->loadFromFile("../../Textures/rockShadowWhite.png"))
 	{
 		std::cout << "ERROR::PLAYER::INITTEXTURE::Coul not load texture from file \n";
 	}
