@@ -258,8 +258,8 @@ class Agent
             this->n_epochs = n_epochs;
             this->gae_lambda = gae_lambda;
 
-            int fc1_dims = 4096;
-            int fc2_dims = 4096;
+            int fc1_dims = 2048;
+            int fc2_dims = 2048;
 
             this->actor = new ActorNetwork(n_actions, input_dims, alpha, fc1_dims, fc2_dims);
             this->critic = new CriticNetwork(input_dims, alpha, fc1_dims, fc2_dims);
