@@ -5,6 +5,8 @@
 /Sources/*.txt
 /Sources/test_*
 /tmp
+/Sources/tmp
 build.sh
 /Sources/ppopy/
 /Sources/plots
+/Sources/create_plot

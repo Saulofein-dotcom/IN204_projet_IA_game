@@ -4,6 +4,7 @@
 void Player::initVariables()
 {
     this->moveSpeed = 10.f; // nombre de pixels parcoururs par appui sur une touche
+    this->moveDiag = 1.f / sqrt(2.f);
     this->attackCoolDownMax = 10.f;
     this->attackCoolDown = this->attackCoolDownMax;
 }
@@ -16,7 +17,7 @@ void Player::initTexture()
         std::cout << "ERROR::PLAYER::INITTEXTURE::Could not load texture file" << std::endl;
     }
     // Same for sword
-    
+
     if (!this->swordTexture.loadFromFile("../../Textures/sword.png"))
     {
         std::cout << "ERROR::PLAYER::INITTEXTURE::Could not load texture file" << std::endl;
@@ -71,18 +72,17 @@ Player::~Player()
 // Functions
 void Player::renderPlayer(RenderTarget &target)
 {
-    //target.draw(this->swordSprite);
+    // target.draw(this->swordSprite);
     target.draw(this->sprite);
 }
 
 void Player::renderFireballs(RenderTarget &target)
 {
-    
+
     for (auto *fireball : this->fireballs)
     {
         fireball->renderFireball(target);
     }
-    
 }
 
 void Player::move(const float dirX, const float dirY)
@@ -186,6 +186,16 @@ void Player::update(int action)
         this->move(0.f, 1.f);
     if (action == 3) // droite
         this->move(1.f, 0.f);
+    if (action == 4) //
+        this->move(0.f, 0.f);
+    if (action == 5)
+        this->move(this->moveDiag, this->moveDiag);
+    if (action == 6)
+        this->move(-this->moveDiag, this->moveDiag);
+    if (action == 7)
+        this->move(this->moveDiag, -this->moveDiag);
+    if (action == 8)
+        this->move(-this->moveDiag, -this->moveDiag);
 }
 
 const bool Player::canAttack()
