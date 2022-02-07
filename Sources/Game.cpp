@@ -151,8 +151,8 @@ Game::~Game()
 
 void Game::run()
 {
-	int width = 10;
-	int height = 10;
+	int width = 5;
+	int height = 5;
 	int frame = 0;
 	int stackNumber = 5;
 	int nbColors = 3;
@@ -161,6 +161,7 @@ void Game::run()
 	random_device rd;  // Will be used to obtain a seed for the random number engine
     mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
     uniform_real_distribution<> dis(-0.05, 0.05);
+	uniform_int_distribution<> disInt(2, 4);
 	int N = 10;
     int batch_size = 32;
     int n_epochs = 5;
@@ -220,9 +221,14 @@ void Game::run()
 			
 			
             T::Tensor observation_;
-			tie(observation_, reward, done) = step(action.to<int>(), state, width, height, nbColors, stackNumber);
-            n_steps += 1;
-            score += reward;
+
+			int nbFrameStep = disInt(gen);
+			for(int k = 0 ; k < nbFrameStep; k++)
+			{
+				tie(observation_, reward, done) = step(action.to<int>(), state, width, height, nbColors, stackNumber);
+            	n_steps += 1;
+            	score += reward;
+			}
             
 			
             agent.remember(observation, action, prob, val, reward, done);
