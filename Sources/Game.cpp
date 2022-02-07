@@ -44,7 +44,7 @@ void Game::initWindow()
 	Set up the window, background, title, settings of the screen
 	*/
 	this->window = new RenderWindow(VideoMode(1300, 900), "Link Revenge", Style::Close | Style::Titlebar);
-	this->window->setFramerateLimit(60);
+	this->window->setFramerateLimit(120);
 	this->window->setVerticalSyncEnabled(false);
 }
 
@@ -216,7 +216,7 @@ void Game::run()
             }
 			time ++;
             observation = observation_;
-			if(time > 600) 
+			if(time > 300) 
 			{
 				done = true;
 				score += 100;
