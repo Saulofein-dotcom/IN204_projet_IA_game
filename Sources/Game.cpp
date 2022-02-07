@@ -159,7 +159,7 @@ void Game::run()
 	RGBABitmapImageReference *imageRef = CreateRGBABitmapImageReference();
 
 	Agent agent = Agent(action_space_n, observation_space_shape, gamma, alpha, gae_lambda, policy_clip, batch_size, n_epochs);
-	int n_games = 3000;
+	int n_games = 300000;
 
 	vector<long> score_history;
     
