@@ -564,7 +564,7 @@ std::vector<unsigned> Game::imageToVectorC(unsigned width, unsigned height, Imag
 	unsigned x_step = sizeOriginal.x / width;
 	unsigned y_step = sizeOriginal.y / width;
 
-	#pragma omp parallel for
+	#pragma omp parallel for schedule(static)
 	for(int j = 0; j < height; j++)
 	{
 		for(int i = 0; i < width; i++)
