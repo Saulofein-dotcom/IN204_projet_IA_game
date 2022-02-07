@@ -150,7 +150,7 @@ void Game::run()
     int batch_size = 32;
     int n_epochs = 5;
     double alpha = 0.0001;
-    int action_space_n = 5;
+    int action_space_n = 9;
     int observation_space_shape = stackNumber * width * height;
     double gamma = 0.99;
     double gae_lambda = 0.95;
