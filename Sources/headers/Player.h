@@ -21,6 +21,7 @@ private:
     float attackCoolDown;
     float attackCoolDownMax;
     Vector2f mouseDirection;
+    float moveDiag;
 
     // Sprites
     Sprite sprite;
@@ -33,7 +34,6 @@ private:
     void initVariables();
     void initTexture();
     void initCoolDowns();
-    
 
 public:
     // Constructors and Destructors
