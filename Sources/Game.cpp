@@ -19,11 +19,16 @@ double average(std::vector<A> const& v){
     return std::reduce(v.begin(), v.end()) / count;
 }
 
-auto Game::step(int action, int stackFrame, int width, int height, int nbColors)
+auto Game::step(int action, vector<double>& state, int width, int height, int nbColors, int stackFrame)
 {
-	vector<double> state(stackFrame*width*height*nbColors);
+	
 	double reward;
 	int a = action;
+	for(int k = 0; k < width * height * nbColors ; k++)
+	{
+		state.erase(state.begin());
+	}
+	
 	/*
 	for(int i = 0; i < stackFrame; i++)
 	{
@@ -38,10 +43,11 @@ auto Game::step(int action, int stackFrame, int width, int height, int nbColors)
 	*/
 	this->update(a);
 	this->render();
-	
+
 	Image imageCapture = this->saveImage();
 	std::vector<unsigned> compressedImage = imageToVectorC(width, height, imageCapture);
-	copy(compressedImage.begin(), compressedImage.end(), state.begin() + i*compressedImage.size());
+	state.resize(width*height*nbColors*stackFrame);
+	copy(compressedImage.begin(), compressedImage.end(), state.begin() + width*height*nbColors*(stackFrame-1));
 	this->end ? reward = -100.0 : reward = 1.0;
 	return make_tuple(T::tensor(state).unsqueeze(0),reward , this->end);
 }
@@ -214,7 +220,7 @@ void Game::run()
 			
 			
             T::Tensor observation_;
-			tie(observation_, reward, done) = step(action.to<int>(), stackNumber, width, height, nbColors);
+			tie(observation_, reward, done) = step(action.to<int>(), state, width, height, nbColors, stackNumber);
             n_steps += 1;
             score += reward;
             

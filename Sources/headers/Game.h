@@ -77,7 +77,7 @@ public:
     Image saveImage();
     std::vector<unsigned> imageToVectorC(unsigned width, unsigned height, Image myImage);
 
-    auto step(int action, int stackFrame, int width, int height, int nbColors);
+    auto step(int action, std::vector<double>& state, int width, int height, int nbColors, int stackFrame);
 
     void resetGame();
 
