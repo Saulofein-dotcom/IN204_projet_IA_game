@@ -19,15 +19,16 @@ double average(std::vector<A> const& v){
     return std::reduce(v.begin(), v.end()) / count;
 }
 
-auto Game::step(int action, vector<double>& state, int width, int height, int nbColors, int stackFrame)
+auto Game::step(int action, vector<double> state, int width, int height, int nbColors, int stackFrame)
 {
 	
 	double reward;
 	int a = action;
-	for(int k = 0; k < width * height * nbColors ; k++)
+	vector<double> next_state(width*height*nbColors*stackFrame);
+	/*for(int k = 0; k < width * height * nbColors ; k++)
 	{
 		state.erase(state.begin());
-	}
+	}*/
 	
 	/*
 	for(int i = 0; i < stackFrame; i++)
@@ -46,10 +47,11 @@ auto Game::step(int action, vector<double>& state, int width, int height, int nb
 
 	Image imageCapture = this->saveImage();
 	std::vector<unsigned> compressedImage = imageToVectorC(width, height, imageCapture);
-	state.resize(width*height*nbColors*stackFrame);
-	copy(compressedImage.begin(), compressedImage.end(), state.begin() + width*height*nbColors*(stackFrame-1));
+	//state.resize(width*height*nbColors*stackFrame);
+	copy(state.begin() + width*height*nbColors, state.end(), next_state.begin());
+	copy(compressedImage.begin(), compressedImage.end(), next_state.begin() + width*height*nbColors*(stackFrame-1));
 	this->end ? reward = -100.0 : reward = 1.0;
-	return make_tuple(T::tensor(state).unsqueeze(0),reward , this->end);
+	return make_tuple(T::tensor(next_state).unsqueeze(0),reward , this->end);
 }
 
 void Game::initWindow()
@@ -58,7 +60,7 @@ void Game::initWindow()
 	Set up the window, background, title, settings of the screen
 	*/
 	this->window = new RenderWindow(VideoMode(1300, 900), "Link Revenge", Style::Close | Style::Titlebar);
-	this->window->setFramerateLimit(120);
+	//this->window->setFramerateLimit();
 	this->window->setVerticalSyncEnabled(false);
 }
 
@@ -151,11 +153,11 @@ Game::~Game()
 
 void Game::run()
 {
-	int width = 100;
-	int height = 100;
+	int width = 150;
+	int height = 150;
 	int frame = 0;
 	int stackNumber = 5;
-	int nbColors = 3;
+	int nbColors = 1;
 	vector<double> state(stackNumber*width*height*nbColors);
 
 	random_device rd;  // Will be used to obtain a seed for the random number engine
@@ -553,8 +555,8 @@ Image Game::saveImage()
 
 std::vector<unsigned> Game::imageToVectorC(unsigned width, unsigned height, Image myImage)
 {
-	//std::vector<unsigned> myVectorImage(width * height);
-	std::vector<unsigned> myVectorImageColored(width * height*3);
+	std::vector<unsigned> myVectorImage(width * height);
+	//std::vector<unsigned> myVectorImageColored(width * height*3);
 
 
 	//Image test;
@@ -564,7 +566,7 @@ std::vector<unsigned> Game::imageToVectorC(unsigned width, unsigned height, Imag
 	unsigned x_step = sizeOriginal.x / width;
 	unsigned y_step = sizeOriginal.y / width;
 
-	#pragma omp parallel for schedule(static)
+	#pragma omp parallel for schedule(dynamic, 10)
 	for(int j = 0; j < height; j++)
 	{
 		for(int i = 0; i < width; i++)
@@ -572,18 +574,18 @@ std::vector<unsigned> Game::imageToVectorC(unsigned width, unsigned height, Imag
 			unsigned red = myImage.getPixel(x_step*i, y_step*j).r;
 			unsigned green = myImage.getPixel(x_step*i, y_step*j).g;
 			unsigned blue = myImage.getPixel(x_step*i, y_step*j).b;
-			//unsigned gray = (red + green + blue) / 3;
+			unsigned gray = 0.299 * red + 0.587 * green + 0.114 * blue;
 
-			myVectorImageColored[3 * j * width + 3 * i] = red;
-			myVectorImageColored[3 * j * width + 3 * i + 1] = green;
-			myVectorImageColored[3 * j * width + 3 * i + 2] = blue;
+			//myVectorImageColored[3 * j * width + 3 * i] = red;
+			//myVectorImageColored[3 * j * width + 3 * i + 1] = green;
+			//myVectorImageColored[3 * j * width + 3 * i + 2] = blue;
 
-			//myVectorImage[i * width + j] = gray;
-			//test.setPixel(i, j, Color(red, green, blue));
+			myVectorImage[j * width + i] = gray;
+			//test.setPixel(i, j, Color(gray, gray, gray));
 		}
 	}
 	//test.saveToFile("../testImage.png");
 
-	return myVectorImageColored;
+	return myVectorImage;
 
 }
