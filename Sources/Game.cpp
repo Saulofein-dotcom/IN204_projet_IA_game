@@ -165,7 +165,7 @@ void Game::run()
     uniform_real_distribution<> dis(-0.05, 0.05);
 	uniform_int_distribution<> disInt(3, 6);
 	int N = 10;
-    int batch_size = 32;
+    int batch_size = 2048;
     int n_epochs = 5;
     double alpha = 0.0001;
     int action_space_n = 9;
