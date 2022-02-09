@@ -75,7 +75,7 @@ public:
     void triggerEndOfGame();
 
     Image saveImage();
-    std::vector<unsigned> imageToVectorC(unsigned width, unsigned height, Image myImage);
+    std::vector<double> imageToVectorC(unsigned width, unsigned height, Image myImage);
 
     auto step(int action, std::vector<double> state, int width, int height, int nbColors, int stackFrame);
 

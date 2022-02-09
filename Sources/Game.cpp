@@ -46,7 +46,7 @@ auto Game::step(int action, vector<double> state, int width, int height, int nbC
 	this->render();
 
 	Image imageCapture = this->saveImage();
-	std::vector<unsigned> compressedImage = imageToVectorC(width, height, imageCapture);
+	std::vector<double> compressedImage = imageToVectorC(width, height, imageCapture);
 	//state.resize(width*height*nbColors*stackFrame);
 	copy(state.begin() + width*height*nbColors, state.end(), next_state.begin());
 	copy(compressedImage.begin(), compressedImage.end(), next_state.begin() + width*height*nbColors*(stackFrame-1));
@@ -203,7 +203,7 @@ void Game::run()
 			this->render();
 
 			Image imageCapture = this->saveImage();
-			std::vector<unsigned> compressedImage = imageToVectorC(width, height, imageCapture);
+			std::vector<double> compressedImage = imageToVectorC(width, height, imageCapture);
 			copy(compressedImage.begin(), compressedImage.end(), state.begin() + frame*compressedImage.size());
 			
 			frame++;
@@ -553,9 +553,9 @@ Image Game::saveImage()
 	return texture.copyToImage();
 }
 
-std::vector<unsigned> Game::imageToVectorC(unsigned width, unsigned height, Image myImage)
+std::vector<double> Game::imageToVectorC(unsigned width, unsigned height, Image myImage)
 {
-	std::vector<unsigned> myVectorImage(width * height);
+	std::vector<double> myVectorImage(width * height);
 	//std::vector<unsigned> myVectorImageColored(width * height*3);
 
 
@@ -574,13 +574,13 @@ std::vector<unsigned> Game::imageToVectorC(unsigned width, unsigned height, Imag
 			unsigned red = myImage.getPixel(x_step*i, y_step*j).r;
 			unsigned green = myImage.getPixel(x_step*i, y_step*j).g;
 			unsigned blue = myImage.getPixel(x_step*i, y_step*j).b;
-			unsigned gray = 0.299 * red + 0.587 * green + 0.114 * blue;
+			double gray = 0.299 * red + 0.587 * green + 0.114 * blue;
 
 			//myVectorImageColored[3 * j * width + 3 * i] = red;
 			//myVectorImageColored[3 * j * width + 3 * i + 1] = green;
 			//myVectorImageColored[3 * j * width + 3 * i + 2] = blue;
 
-			myVectorImage[j * width + i] = gray;
+			myVectorImage[j * width + i] = gray/255;
 			//test.setPixel(i, j, Color(gray, gray, gray));
 		}
 	}
