@@ -3,14 +3,14 @@
 void Enemy::initVariables()
 {
 
-	this->speed = 5.f;
+	this->speed = 1.f;
 }
 
 void Enemy::initTexture()
 {
 	// Load a texture from file
 	this->texture = new Texture();
-	if (!this->texture->loadFromFile("../../Textures/Enemy.png"))
+	if (!this->texture->loadFromFile("../../Textures/red.png"))
 	{
 		std::cout << "ERROR::PLAYER::INITTEXTURE::Coul not load texture from file \n";
 	}
@@ -25,13 +25,15 @@ void Enemy::initSprite()
 {
 	// Set texture to sprite
 	this->sprite.setTexture(*this->texture);
-
+	this->sprite.scale(0.2f, 0.2f);
+	/*
 	this->currentFrame = IntRect(0, 0, 16, 16);
 
 	this->sprite.setTextureRect(this->currentFrame);
 
 	// Resize the Sprite
 	this->sprite.scale(6.f, 6.f);
+	*/
 }
 
 // Constructors/Deconstructors
@@ -85,7 +87,7 @@ void Enemy::update()
 {
 	this->sprite.move(this->speed * this->directionX, this->speed * this->directionY);
 	// std::cout << "Enemy is x : " << this->getBounds().left << ", y : " << this->getBounds().top << "\n";
-	this->updateAnimation();
+	//this->updateAnimation();
 }
 
 void Enemy::render(RenderTarget *target)

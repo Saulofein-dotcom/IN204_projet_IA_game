@@ -15,7 +15,7 @@ template<typename A>
 vector<A> appliedOn(vector<A> myVect, T::Tensor batch)
 {
     vector<A> myNewVect = {};
-    for(int i = 0; i < batch.size(-1); i++)
+    for(long i = 0; i < batch.size(-1); i++)
     {
         myNewVect.push_back(myVect[batch[i].item<int>()]);
     }
@@ -83,12 +83,12 @@ public:
         }
         else
         {
-            for(int i = 0; i < batch_start.size(-1); i++)
+            for(long i = 0; i < batch_start.size(-1); i++)
             {
                 T::Tensor newTensor = T::tensor({});
-                for(int j = 0; j < this->batch_size && batch_start[i].item<int>() + j < random_indices.size(-1); j++)
+                for(long j = 0; j < this->batch_size && batch_start[i].item<long>() + j < random_indices.size(-1); j++)
                 {
-                    int tmp = random_indices[batch_start[i].item<int>() + j].item<int>();
+                    long tmp = random_indices[batch_start[i].item<long>() + j].item<long>();
                     if (j==0) newTensor = T::tensor({tmp});
                     else newTensor = T::cat({newTensor, T::tensor({tmp})});
                 }
@@ -108,7 +108,7 @@ public:
     vector<double> tensorToVector(T::Tensor state)
     {
         vector<double> myVec(state.size(-1));
-        for(int i = 0; i < state.size(-1) ; i++)
+        for(long i = 0; i < state.size(-1) ; i++)
         {
             myVec[i] = state[0][i].item<double>();
         }
@@ -149,7 +149,7 @@ public:
     optim::Adam *optimizer;
     T::Device* device;
 
-    ActorNetwork(long int n_actions, int input_dims, double alpha, long int fc1_dims=256, long int fc2_dims=256, string chkpt_dir = "../tmp/ppo") : nn::Module()
+    ActorNetwork(long int n_actions, long input_dims, double alpha, long int fc1_dims=256, long int fc2_dims=256, string chkpt_dir = "../tmp/ppo") : nn::Module()
     {
         this->checkpoint_file = chkpt_dir;
         this->checkpoint_file += "/actor_torch_ppo.pt";
@@ -199,7 +199,7 @@ class CriticNetwork : public nn::Module
 
 
     public:
-        CriticNetwork(long long input_dims, double alpha, long fc1_dims=256, long fc2_dims=256, string chkpt_dir="../tmp/ppo" ) : nn::Module()
+        CriticNetwork(long input_dims, double alpha, long fc1_dims=256, long fc2_dims=256, string chkpt_dir="../tmp/ppo" ) : nn::Module()
         {
             this->checkpoint_file = chkpt_dir + "/critic_torch_ppo.pt";
             this->critic = nn::Sequential(
@@ -258,8 +258,8 @@ class Agent
             this->n_epochs = n_epochs;
             this->gae_lambda = gae_lambda;
 
-            int fc1_dims = 2048;
-            int fc2_dims = 2048;
+            long fc1_dims = 2048;
+            long fc2_dims = 2048;
 
             this->actor = new ActorNetwork(n_actions, input_dims, alpha, fc1_dims, fc2_dims);
             this->critic = new CriticNetwork(input_dims, alpha, fc1_dims, fc2_dims);
@@ -348,7 +348,7 @@ class Agent
         
         void learn()
         {
-            for(int NULL_VAR = 0; NULL_VAR < this->n_epochs; NULL_VAR++)
+            for(long NULL_VAR = 0; NULL_VAR < this->n_epochs; NULL_VAR++)
             {
                 vector<vector<double>> state_arr;
                 vector<double> old_prob_arr;
@@ -368,12 +368,12 @@ class Agent
 
                 
                 
-                for(int t = 0; t < reward_arr.size() - 1; t++)
+                for(long t = 0; t < reward_arr.size() - 1; t++)
                 {
                     
                     double discount = 1;
                     double a_t = 0;
-                    for(int k = t; k < reward_arr.size() - 1; k++)
+                    for(long k = t; k < reward_arr.size() - 1; k++)
                     { 
 
                         a_t += discount*(reward_arr[k] + this->gamma*values[k+1] * (1 - dones_arr[k]) - values[k]);
@@ -388,7 +388,7 @@ class Agent
                 T::Tensor valuesToReturn;
                 values.size()==0 ? valuesToReturn = T::tensor(values).to(*this->actor->device) : valuesToReturn = T::tensor(values).data().to(*this->actor->device);
 
-                for(int i = 0; i < batches.size() ; i++)
+                for(long i = 0; i < batches.size() ; i++)
                 {
                     T::Tensor batch = batches[i];
 
@@ -398,8 +398,9 @@ class Agent
                     long n = myArray.size();
                     long m = myArray[0].size();
                     T::Tensor states = torch::zeros({n, m}, options);
-                    for (int i = 0; i < n; i++)
+                    for (long i = 0; i < n; i++)
                         states.slice(0, i,i+1) = torch::from_blob(myArray[i].data(), {m}, options);
+
                     
                     states = states.to(*this->actor->device);
                     T::Tensor old_probs = T::tensor(appliedOn(old_prob_arr,batch)).to(*this->actor->device);
@@ -411,7 +412,7 @@ class Agent
                     
                     
                     T::Tensor new_probs = T::zeros(actions.size(-1));
-                    for(int i = 0; i < actions.size(-1); i++) new_probs[i] = log(dist[i][actions[i]]);
+                    for(long i = 0; i < actions.size(-1); i++) new_probs[i] = log(dist[i][actions[i]]);
                     
                     T::Tensor prob_ratio = new_probs.exp() / old_probs.exp();
                     
@@ -449,7 +450,7 @@ class Agent
         T::Tensor appliedOnTensor(T::Tensor myTensor, T::Tensor batch)
         {
             T::Tensor newTensor = T::zeros(batch.size(-1));
-            for(int i = 0; i < batch.size(-1); i++)
+            for(long i = 0; i < batch.size(-1); i++)
             {
                 newTensor[i] = myTensor[batch[i]];
             }

@@ -3,7 +3,7 @@
 // Init functions
 void Player::initVariables()
 {
-    this->moveSpeed = 10.f; // nombre de pixels parcoururs par appui sur une touche
+    this->moveSpeed = 1.f; // nombre de pixels parcoururs par appui sur une touche
     this->moveDiag = 1.f / sqrt(2.f);
     this->attackCoolDownMax = 10.f;
     this->attackCoolDown = this->attackCoolDownMax;
@@ -12,7 +12,7 @@ void Player::initVariables()
 void Player::initTexture()
 {
     // Load texture from file
-    if (!this->texture.loadFromFile("../../Textures/link_standing.png"))
+    if (!this->texture.loadFromFile("../../Textures/white.png"))
     {
         std::cout << "ERROR::PLAYER::INITTEXTURE::Could not load texture file" << std::endl;
     }
@@ -31,7 +31,7 @@ void Player::initSprite()
     this->swordSprite.setTexture(this->swordTexture);
 
     // Resize the player sprite and sword sprite
-    this->sprite.scale(0.8f, 0.8f);
+    this->sprite.scale(0.2f, 0.2f);
     this->swordSprite.scale(0.2f, 0.2f);
     this->swordSprite.setOrigin(this->swordSprite.getLocalBounds().width / 2, 0);
 }

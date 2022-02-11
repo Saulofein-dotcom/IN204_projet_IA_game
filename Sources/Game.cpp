@@ -50,7 +50,7 @@ auto Game::step(int action, vector<double> state, int width, int height, int nbC
 	//state.resize(width*height*nbColors*stackFrame);
 	copy(state.begin() + width*height*nbColors, state.end(), next_state.begin());
 	copy(compressedImage.begin(), compressedImage.end(), next_state.begin() + width*height*nbColors*(stackFrame-1));
-	this->end ? reward = -100.0 : reward = 1.0;
+	this->end ? reward = -1.0 : reward = 1.0;
 	return make_tuple(T::tensor(next_state).unsqueeze(0),reward , this->end);
 }
 
@@ -59,7 +59,7 @@ void Game::initWindow()
 	/*
 	Set up the window, background, title, settings of the screen
 	*/
-	this->window = new RenderWindow(VideoMode(1300, 900), "Link Revenge", Style::Close | Style::Titlebar);
+	this->window = new RenderWindow(VideoMode(100, 100), "Link Revenge", Style::Close | Style::Titlebar);
 	//this->window->setFramerateLimit();
 	this->window->setVerticalSyncEnabled(false);
 }
@@ -90,11 +90,9 @@ void Game::initEnemies()
 	/*
 	Initialize variables of the enemies
 	*/
-	this->spawnTimerMax = 12.f;
+	this->spawnTimerMax = 4.f;
 	this->spawnTimer = this->spawnTimerMax;
 
-	this->spawnTimerMaxRock = 35.f;
-	this->spawnTimerRock = this->spawnTimerMaxRock;
 }
 
 void Game::initGUI()
@@ -145,18 +143,16 @@ Game::~Game()
 	{
 		delete i;
 	}
-	for (auto *i : this->enemiesRock)
-	{
-		delete i;
-	}
+
 }
 
 void Game::run()
 {
-	int width = 150;
-	int height = 150;
+	long width = 100;
+	long height = 100;
 	int frame = 0;
 	int stackNumber = 5;
+	int nbEtats = 50*4 + 2;
 	int nbColors = 1;
 	vector<double> state(stackNumber*width*height*nbColors);
 
@@ -164,12 +160,12 @@ void Game::run()
     mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
     uniform_real_distribution<> dis(-0.05, 0.05);
 	uniform_int_distribution<> disInt(3, 6);
-	int N = 10;
-    int batch_size = 2048;
+	int N = 20;
+    int batch_size = 64;
     int n_epochs = 5;
     double alpha = 0.0001;
     int action_space_n = 9;
-    int observation_space_shape = stackNumber * width * height * nbColors;
+    long observation_space_shape = stackNumber * width * height * nbColors;
     double gamma = 0.99;
     double gae_lambda = 0.95;
     double policy_clip = 0.2;
@@ -177,7 +173,7 @@ void Game::run()
 	RGBABitmapImageReference *imageRef = CreateRGBABitmapImageReference();
 
 	Agent agent = Agent(action_space_n, observation_space_shape, gamma, alpha, gae_lambda, policy_clip, batch_size, n_epochs);
-	int n_games = 300000;
+	long n_games = 300000L;
 
 	vector<long> score_history;
     
@@ -186,9 +182,9 @@ void Game::run()
     double avg_score = 0;
     long n_steps = 0;
 
-	for(int i = 0; i < n_games ; i++)
+	for(long i = 0; i < n_games ; i++)
     {
-		int time = 0;
+		long time =0;
 		this->resetGame();
 		
         bool done = false;
@@ -208,6 +204,7 @@ void Game::run()
 			
 			frame++;
 		}
+		
 		frame = 0;
         T::Tensor observation = T::tensor(state).unsqueeze(0);
 
@@ -232,7 +229,6 @@ void Game::run()
             	score += reward;
 			}
             
-			
             agent.remember(observation, action, prob, val, reward, done);
 			
             if(n_steps % N == 0)
@@ -246,13 +242,14 @@ void Game::run()
 			if(time > 600) 
 			{
 				done = true;
-				score += 100;
+				score += 1;
 			}
-
-
         }
+
+		for(int i = 0; i < 10 ; i++) cout << state[observation_space_shape -1 - i] <<endl;
+
         score_history.push_back(score);
-        int minValue;
+        long minValue;
         score_history.size() < 100 ? minValue = score_history.size() : minValue = 100;
         vector<int64_t> score_tmp(score_history.end() - minValue, score_history.end());
         
@@ -269,15 +266,15 @@ void Game::run()
         /*================ PLOT SCORE =================*/
 
         vector<double> x(score_history.size());
-        for(int l = 0; l < score_history.size(); l++)
+        for(long l = 0; l < score_history.size(); l++)
         {
             x[l] = l+1;
         }
         
         vector<double> running_avg(score_history.size());
-        for(int m = 0; m < running_avg.size(); m++)
+        for(long m = 0; m < running_avg.size(); m++)
         {
-            int tmpMax;
+            long tmpMax;
             m - 100 > 0 ? tmpMax = m-100 : tmpMax = 0;
 
             vector<int64_t> score_tmp_run(score_history.begin() + tmpMax, score_history.begin() + m + 1);
@@ -371,23 +368,23 @@ void Game::updateEnemies()
 		float posY = 10.f;
 		if (randomWindow == 0) // Left
 		{
-			posX = -100.f;
+			posX = -20.f;
 			posY = static_cast<float>(rand() % this->window->getSize().y);
 		}
 		else if (randomWindow == 1) // Top
 		{
 			posX = static_cast<float>(rand() % this->window->getSize().x);
-			posY = -100.f;
+			posY = -20.f;
 		}
 		else if (randomWindow == 2) // Right
 		{
-			posX = this->window->getSize().x + 100.f;
+			posX = this->window->getSize().x + 20.f;
 			posY = static_cast<float>(rand() % this->window->getSize().y);
 		}
 		else // Bottom
 		{
 			posX = static_cast<float>(rand() % this->window->getSize().x);
-			posY = this->window->getSize().y + 100.f;
+			posY = this->window->getSize().y + 20.f;
 		}
 		float posXCenter = (float)this->window->getSize().x / 4 + (rand() % this->window->getSize().x / 2);
 		float posYCenter = (float)this->window->getSize().y / 3 + (rand() % this->window->getSize().y / 3);
@@ -396,14 +393,7 @@ void Game::updateEnemies()
 		this->spawnTimer = 0.f;
 	}
 
-	if (this->spawnTimerRock > this->spawnTimerMaxRock)
-	{
-		int pos_x = (rand() % (this->window->getSize().x - 150));
-		int pos_y_explode = (rand() % (this->window->getSize().y - 150));
-		int pos_y = pos_y_explode - this->window->getSize().y;
-		this->enemiesRock.push_back(new EnemyRock(pos_x, pos_y, pos_x, pos_y_explode));
-		this->spawnTimerRock = 0.f;
-	}
+	
 
 	// Update position of skeleton enemies
 	bool enemy_removed = false;
@@ -419,26 +409,15 @@ void Game::updateEnemies()
 			this->triggerEndOfGame();
 		}
 
-		// Enemies hit by a fireball are destroyed and the fireball is deleted
-		for (int j = 0; j < this->player->fireballs.size() && !enemy_removed; ++j)
-		{
-			if (this->player->fireballs[j]->getBounds().intersects(this->enemies[i]->getBounds()))
-			{
-				delete this->player->getFireballs().at(j);
-				this->player->fireballs.erase(this->player->fireballs.begin() + j);
-				delete this->enemies.at(i);
-				this->enemies.erase(this->enemies.begin() + i);
-				enemy_removed = true;
-			}
-		}
+		
 
 		// Enemies out of bounds are deleted
 		if (!enemy_removed)
 		{
-			if (this->enemies[i]->getBounds().top > this->window->getSize().y + 120.f ||
-				this->enemies[i]->getBounds().top < -120.f ||
-				this->enemies[i]->getBounds().left < -120.f ||
-				this->enemies[i]->getBounds().left > this->window->getSize().x + 120.f)
+			if (this->enemies[i]->getBounds().top > this->window->getSize().y + 20.f ||
+				this->enemies[i]->getBounds().top < -20.f ||
+				this->enemies[i]->getBounds().left < -20.f ||
+				this->enemies[i]->getBounds().left > this->window->getSize().x + 20.f)
 			{
 				delete this->enemies.at(i);
 				this->enemies.erase(this->enemies.begin() + i);
@@ -447,26 +426,7 @@ void Game::updateEnemies()
 		enemy_removed = false;
 	}
 
-	int counter = 0;
-	for (auto *enemy : this->enemiesRock)
-	{
-		enemy->update(); // Move the rock enemy
-
-		// Check for collision with player
-		if (this->player->getBounds().intersects(enemy->getBounds()) && enemy->isDangerous())
-		{
-			// End of game
-			this->triggerEndOfGame();
-		}
-		if (enemy->isDestroyed())
-		{
-			delete this->enemiesRock.at(counter);
-			this->enemiesRock.erase(this->enemiesRock.begin() + counter);
-			--counter;
-		}
-
-		++counter;
-	}
+	
 }
 
 void Game::triggerEndOfGame()
@@ -529,11 +489,7 @@ void Game::render()
 
 void Game::resetGame()
 {
-	for(int k = 0; k < this->enemiesRock.size(); k++)
-	{
-		
-		delete this->enemiesRock.at(k);
-	}
+
 	for(int k = 0; k < this->enemies.size(); k++)
 	{
 		
@@ -541,7 +497,6 @@ void Game::resetGame()
 		
 	}
 	this->enemies.clear();
-	this->enemiesRock.clear();
 	this->player->initPosition();
 }
 
@@ -563,13 +518,13 @@ std::vector<double> Game::imageToVectorC(unsigned width, unsigned height, Image 
 	//test.create(width, height); 
 
 	Vector2u sizeOriginal = myImage.getSize();
-	unsigned x_step = sizeOriginal.x / width;
-	unsigned y_step = sizeOriginal.y / width;
+	long x_step = sizeOriginal.x / width;
+	long y_step = sizeOriginal.y / width;
 
 	#pragma omp parallel for schedule(dynamic, 10)
-	for(int j = 0; j < height; j++)
+	for(long j = 0; j < height; j++)
 	{
-		for(int i = 0; i < width; i++)
+		for(long i = 0; i < width; i++)
 		{
 			unsigned red = myImage.getPixel(x_step*i, y_step*j).r;
 			unsigned green = myImage.getPixel(x_step*i, y_step*j).g;
