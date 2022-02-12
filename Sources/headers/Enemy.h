@@ -41,6 +41,9 @@ public:
     // Accessors
     const FloatRect getBounds() const;
 
+    Vector2f getPosition();
+    Vector2f getDirection();
+
     // Functions
     void updateAnimation();
     void update();

@@ -70,6 +70,16 @@ const FloatRect Enemy::getBounds() const
 	return this->sprite.getGlobalBounds();
 }
 
+Vector2f Enemy::getPosition()
+{
+    return this->sprite.getPosition();
+}
+
+Vector2f Enemy::getDirection()
+{
+	Vector2f dir = {this->directionX, this->directionY};
+    return dir;
+}
 /*-------------------------------------*/
 /*--------------Update-----------------*/
 /*-------------------------------------*/
