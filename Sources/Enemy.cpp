@@ -3,7 +3,7 @@
 void Enemy::initVariables()
 {
 
-	this->speed = 1.f;
+	this->speed = .5f;
 }
 
 void Enemy::initTexture()

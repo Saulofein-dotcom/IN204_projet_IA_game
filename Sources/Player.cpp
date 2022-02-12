@@ -3,7 +3,7 @@
 // Init functions
 void Player::initVariables()
 {
-    this->moveSpeed = 1.f; // nombre de pixels parcoururs par appui sur une touche
+    this->moveSpeed = .5f; // nombre de pixels parcoururs par appui sur une touche
     this->moveDiag = 1.f / sqrt(2.f);
     this->attackCoolDownMax = 10.f;
     this->attackCoolDown = this->attackCoolDownMax;
@@ -175,7 +175,7 @@ void Player::update()
     */
 }
 
-void Player::update(int action)
+void Player::update(uint action)
 {
     // Update Position
     if (action == 0) // haut
@@ -196,6 +196,12 @@ void Player::update(int action)
         this->move(this->moveDiag, -this->moveDiag);
     if (action == 8)
         this->move(-this->moveDiag, -this->moveDiag);
+}
+
+void Player::update(double up, double left, double down, double right)
+{
+    float limit = .5;
+    this->move(limit*(right - left), limit*(up - down));
 }
 
 const bool Player::canAttack()

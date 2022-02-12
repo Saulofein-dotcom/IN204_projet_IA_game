@@ -3,23 +3,11 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
-#include <limits.h>
-#include<torch/torch.h>
 #include"ppo_torch.cpp"
 #include "./create_plot/pbPlots.hpp"
 #include "./create_plot/supportLib.hpp"
-#include "ProximalPolicyOptimization.h"
-#include "Models.h"
-
-enum STATUS {
-    PLAYING,
-    WON,
-    LOST,
-    RESETTING
-};
 
 using namespace std;
-
 
 template<typename A>
 double average(std::vector<A> const& v){
@@ -31,76 +19,39 @@ double average(std::vector<A> const& v){
     return std::reduce(v.begin(), v.end()) / count;
 }
 
-auto Game::actualState(uint n_in)
+auto Game::step(int action, vector<double> state, int width, int height, int nbColors, int stackFrame)
 {
-	torch::Tensor next_state = T::zeros({1, n_in}, torch::kF64);
 	
-	next_state[0][0] = this->player->getPosition().x;
-	next_state[0][1] = this->player->getPosition().y;
-
-	for(int k = 0; k < this->enemies.size(); k++)
+	double reward;
+	int a = action;
+	vector<double> next_state(width*height*nbColors*stackFrame);
+	/*for(int k = 0; k < width * height * nbColors ; k++)
 	{
-		next_state[0][2 + 4*k] = this->enemies[k]->getPosition().x;
-		next_state[0][2 + 4*k + 1] = this->enemies[k]->getPosition().y;
-		next_state[0][2 + 4*k + 2] = this->enemies[k]->getDirection().x;
-		next_state[0][2 + 4*k + 3] = this->enemies[k]->getDirection().y;
-	}
-	for(int k = 2 + 4*this->enemies.size(); k < next_state.size(-1); k++)
+		state.erase(state.begin());
+	}*/
+	
+	/*
+	for(int i = 0; i < stackFrame; i++)
 	{
-		next_state[0][k] = INT32_MAX;
-		next_state[0][k] = INT32_MAX;
-		next_state[0][k] = INT32_MAX;
-		next_state[0][k] = INT32_MAX;
-	}
-	return next_state;
-}
+		
+		this->update(a);
+		this->render();
 
-auto Game::step(T::Tensor actions, uint n_in, uint timestep)
-{
-	this->update(actions);
+		Image imageCapture = this->saveImage();
+		std::vector<unsigned> compressedImage = imageToVectorC(width, height, imageCapture);
+		copy(compressedImage.begin(), compressedImage.end(), state.begin() + i*compressedImage.size());
+	}
+	*/
+	this->update(a);
 	this->render();
 
-	torch::Tensor state = this->actualState(n_in);
-	torch::Tensor done = torch::zeros({1, 1}, torch::kF64);
-    STATUS status;
-
-	if(timestep > 15000)
-	{
-		status = WON;
-		done[0][0] = 1.0;
-	}else if(this->end)
-	{
-		status = LOST;
-		done[0][0] = 1.0;
-	}else{
-		status=PLAYING;
-		done[0][0] = 0.0;
-	}
-
-	return std::make_tuple(state, status, done);
-
-}
-
-auto Reward(int status) -> torch::Tensor
-{
-	torch::Tensor reward = torch::full({1, 1}, 0, torch::kF64);
-
-	switch (status)
-	{
-		case PLAYING:
-			reward[0][0] += 1.;
-			break;
-		case WON:
-			reward[0][0] += 100.;
-			printf("won, reward: %f\n", reward[0][0].item<double>());
-			break;
-		case LOST:
-			reward[0][0] -= 100.;
-			printf("lost, reward: %f\n", reward[0][0].item<double>());
-			break;
-	}
-
-	return reward;
+	Image imageCapture = this->saveImage();
+	std::vector<double> compressedImage = imageToVectorC(width, height, imageCapture);
+	//state.resize(width*height*nbColors*stackFrame);
+	copy(state.begin() + width*height*nbColors, state.end(), next_state.begin());
+	copy(compressedImage.begin(), compressedImage.end(), next_state.begin() + width*height*nbColors*(stackFrame-1));
+	this->end ? reward = -1.0 : reward = 1.0;
+	return make_tuple(T::tensor(next_state).unsqueeze(0),reward , this->end);
 }
 
 void Game::initWindow()
@@ -108,7 +59,7 @@ void Game::initWindow()
 	/*
 	Set up the window, background, title, settings of the screen
 	*/
-	this->window = new RenderWindow(VideoMode(200, 200), "Link Revenge", Style::Close | Style::Titlebar);
+	this->window = new RenderWindow(VideoMode(100, 100), "Link Revenge", Style::Close | Style::Titlebar);
 	//this->window->setFramerateLimit();
 	this->window->setVerticalSyncEnabled(false);
 }
@@ -139,11 +90,33 @@ void Game::initEnemies()
 	/*
 	Initialize variables of the enemies
 	*/
-	this->spawnTimerMax = 7.f;
+	this->spawnTimerMax = 4.f;
 	this->spawnTimer = this->spawnTimerMax;
 
 }
 
+void Game::initGUI()
+{
+	// Load font
+	if (!this->font.loadFromFile("../../Fonts/ARCADE.TTF"))
+		std::cout << "ERROR::GAME::Failed to load font\n";
+
+	// Init time text
+	this->timeText.setFont(this->font);
+	this->timeText.setCharacterSize(75);
+	this->timeText.setFillColor(sf::Color::White);
+	this->timeText.setString("00:00");
+	this->timeText.setPosition(30.f, 10.f);
+
+	// Init gameOverText
+	this->gameOverText.setFont(this->font);
+	this->gameOverText.setCharacterSize(60);
+	this->gameOverText.setFillColor(sf::Color::Red);
+	this->gameOverText.setString("Game Over");
+	this->gameOverText.setPosition(
+		this->window->getSize().x / 2.f - this->gameOverText.getGlobalBounds().width / 2.f,
+		this->window->getSize().y / 2.f - this->gameOverText.getGlobalBounds().height / 2.f);
+}
 
 void Game::initClock()
 {
@@ -175,153 +148,156 @@ Game::~Game()
 
 void Game::run()
 {
-	// Model.
-	int width = 80;
-	int height = 80;
-	int frames = 4;
-    u_int64_t n_in = width * height * frames;
-    uint n_out = 4;
-    double std = 1e-2;
+	long width = 100;
+	long height = 100;
+	int frame = 0;
+	int stackNumber = 5;
+	int nbEtats = 50*4 + 2;
+	int nbColors = 1;
+	vector<double> state(stackNumber*width*height*nbColors);
 
-	ActorCritic ac(n_in, n_out, std);
-    ac->to(torch::kF64);
-    ac->normal(0., std);
-    torch::optim::Adam opt(ac->parameters(), 1e-3);
-
-	// Training loop.
-    uint n_iter =10000;
-    uint n_steps = 2048;
-    uint n_epochs = 500;
-    uint mini_batch_size = 512;
-    uint ppo_epochs = 4;
-    double beta = 1e-3;
-
-    VT states;
-    VT actions;
-    VT rewards;
-    VT dones;
-
-    VT log_probs;
-    VT returns;
-    VT values;
-	
-	// Counter.
-    uint c = 0;
-	uint timestep = 0;
-	vector<double> score_history;
+	random_device rd;  // Will be used to obtain a seed for the random number engine
+    mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
+    uniform_real_distribution<> dis(-0.05, 0.05);
+	uniform_int_distribution<> disInt(3, 6);
+	int N = 20;
+    int batch_size = 64;
+    int n_epochs = 5;
+    double alpha = 0.0001;
+    int action_space_n = 9;
+    long observation_space_shape = stackNumber * width * height * nbColors;
+    double gamma = 0.99;
+    double gae_lambda = 0.95;
+    double policy_clip = 0.2;
 
 	RGBABitmapImageReference *imageRef = CreateRGBABitmapImageReference();
 
-	// Average reward.
-    double best_avg_reward = INT32_MIN;
-    double avg_reward = 0.;
+	Agent agent = Agent(action_space_n, observation_space_shape, gamma, alpha, gae_lambda, policy_clip, batch_size, n_epochs);
+	long n_games = 300000L;
 
-	for (uint e=1;e<=n_epochs;e++)
+	vector<long> score_history;
+    
+    double best_score = -100000;
+    long learn_iters = 0;
+    double avg_score = 0;
+    long n_steps = 0;
+
+	for(long i = 0; i < n_games ; i++)
     {
-		printf("epoch %u/%u\n", e, n_epochs);
-		for (uint i=0;i<n_iter;i++)
-        {
-			states.push_back(this->actualState(n_in));
+		long time =0;
+		this->resetGame();
+		
+        bool done = false;
+		this->end = false;
+		frame = 0;
 
-			auto av = ac->forward(states[c]);
-            actions.push_back(std::get<0>(av));
-            values.push_back(std::get<1>(av));
-            log_probs.push_back(ac->log_prob(actions[c]));
+		
+
+		while(frame < stackNumber)
+		{
+			this->update(5);
+			this->render();
+
+			Image imageCapture = this->saveImage();
+			std::vector<double> compressedImage = imageToVectorC(width, height, imageCapture);
+			copy(compressedImage.begin(), compressedImage.end(), state.begin() + frame*compressedImage.size());
 			
-			/*
-			uint action = 0;
-			double max_value = actions[c][0][0].item<double>();
-			for(int i = 1; i < n_out; i++)
-			{
-				if(max_value < actions[c][0][i].item<double>()) 
-				{
-					action = i;
-					max_value = actions[c][0][i].item<double>();
-				}
-			}
-			*/
-
-			auto sd = this->step(actions[c][0], n_in, timestep);
-
-			// New state.
-            rewards.push_back(Reward(std::get<1>(sd)));
-            dones.push_back(std::get<2>(sd));
-
-			avg_reward += rewards[c][0][0].item<double>()/n_iter;
-
-            // episode, agent_x, agent_y, goal_x, goal_y, AGENT=(PLAYING, WON, LOST, RESETTING)
-            
-
-            if (dones[c][0][0].item<double>() == 1.) 
-            {
-				this->resetGame();
-			}
-			c++;
-
-			if (c%n_steps == 0)
-            {
-                printf("Updating the network.\n");
-                values.push_back(std::get<1>(ac->forward(states[c-1])));
-
-                returns = PPO::returns(rewards, dones, values, .99, .95);
-
-                torch::Tensor t_log_probs = torch::cat(log_probs).detach();
-                torch::Tensor t_returns = torch::cat(returns).detach();
-                torch::Tensor t_values = torch::cat(values).detach();
-                torch::Tensor t_states = torch::cat(states);
-                torch::Tensor t_actions = torch::cat(actions);
-                torch::Tensor t_advantages = t_returns - t_values.slice(0, 0, n_steps);
-
-                PPO::update(ac, t_states, t_actions, t_log_probs, t_returns, t_advantages, opt, n_steps, ppo_epochs, mini_batch_size, beta);
-            
-                c = 0;
-
-                states.clear();
-                actions.clear();
-                rewards.clear();
-                dones.clear();
-
-                log_probs.clear();
-                returns.clear();
-                values.clear();
-            }
+			frame++;
 		}
-		// Save the best net.
-        if (avg_reward > best_avg_reward) {
+		
+		frame = 0;
+        T::Tensor observation = T::tensor(state).unsqueeze(0);
 
-            best_avg_reward = avg_reward;
-            printf("Best average reward: %f\n", best_avg_reward);
-            torch::save(ac, "../tmp/ppo/best_model.pt");
+        long score = 0;
+        while(!done)
+        {
+			
+            c10::Scalar action ,prob, val;
+            tie(action, prob, val) = agent.choose_action(observation);
+			
+
+            double reward;
+			
+			
+            T::Tensor observation_;
+
+			int nbFrameStep = disInt(gen);
+			for(int k = 0 ; k < nbFrameStep; k++)
+			{
+				tie(observation_, reward, done) = step(action.to<int>(), state, width, height, nbColors, stackNumber);
+            	n_steps += 1;
+            	score += reward;
+			}
+            
+            agent.remember(observation, action, prob, val, reward, done);
+			
+            if(n_steps % N == 0)
+            {
+				
+                agent.learn();
+                learn_iters += 1;
+            }
+			time ++;
+            observation = observation_;
+			if(time > 600) 
+			{
+				done = true;
+				score += 1;
+			}
         }
 
-		/*================ PLOT SCORE =================*/
-		score_history.push_back(avg_reward);
-		vector<double> x(score_history.size());
-		for(long l = 0; l < score_history.size(); l++)
-		{
-			x[l] = l+1;
-		}
+		for(int i = 0; i < 10 ; i++) cout << state[observation_space_shape -1 - i] <<endl;
 
-		StringReference* error = new StringReference();
-		DrawScatterPlot(imageRef, 600, 400, &x, &score_history, error);
+        score_history.push_back(score);
+        long minValue;
+        score_history.size() < 100 ? minValue = score_history.size() : minValue = 100;
+        vector<int64_t> score_tmp(score_history.end() - minValue, score_history.end());
+        
+        double avg_score = average(score_tmp);
+        if(avg_score > best_score)
+        {
+            best_score = avg_score;
+            agent.save_models();
+        }
 
-		vector<double> *pngData = ConvertToPNG(imageRef->image);
+        cout << "episode " << i << " score "<< score << ", avg_score : " << avg_score
+                << ", time steps " << n_steps << ", learning_steps " << learn_iters << ", temps : "<< time <<  endl;
 
-		WriteToFile(pngData, "../create_plot/plotScore.png");
-		DeleteImage(imageRef->image);
-		delete error;
+        /*================ PLOT SCORE =================*/
 
-        avg_reward = 0.;
+        vector<double> x(score_history.size());
+        for(long l = 0; l < score_history.size(); l++)
+        {
+            x[l] = l+1;
+        }
+        
+        vector<double> running_avg(score_history.size());
+        for(long m = 0; m < running_avg.size(); m++)
+        {
+            long tmpMax;
+            m - 100 > 0 ? tmpMax = m-100 : tmpMax = 0;
 
-		this->resetGame();
-	}
+            vector<int64_t> score_tmp_run(score_history.begin() + tmpMax, score_history.begin() + m + 1);
+            running_avg[m] = average(score_tmp_run);
+            
+        }
+
+        StringReference* error = new StringReference();
+        DrawScatterPlot(imageRef, 600, 400, &x, &running_avg, error);
+
+        vector<double> *pngData = ConvertToPNG(imageRef->image);
+
+        WriteToFile(pngData, "../create_plot/plotScore.png");
+        DeleteImage(imageRef->image);
+        delete error;
+        
+    }
+
+	
+	
 }
 
-	
-	
-
-
-void Game::update(T::Tensor a)
+void Game::update(int a)
 {
 	this->updateClock();
 	//this->updateGUI();
@@ -329,16 +305,6 @@ void Game::update(T::Tensor a)
 	this->updatePlayer(a);
 	this->updateEnemies();
 }
-/*
-void Game::update(uint a)
-{
-	this->updateClock();
-	//this->updateGUI();
-	this->updatePollEvents();
-	this->updatePlayer(a);
-	this->updateEnemies();
-}
-*/
 
 void Game::updateClock()
 {
@@ -359,9 +325,9 @@ void Game::updateGUI()
 	this->timeText.setString(ss.str());
 }
 
-void Game::updatePlayer(T::Tensor a)
+void Game::updatePlayer(int a)
 {
-	this->player->update(a[0].item<double>(), a[1].item<double>(), a[2].item<double>(), a[3].item<double>()); // Move player, sword, udpdate fireballs
+	this->player->update(a); // Move player, sword, udpdate fireballs
 
 	// TODO : refactoring + update sword collision according to player collision
 	if (this->player->getBounds().left < 0)
@@ -530,7 +496,6 @@ void Game::resetGame()
 		delete this->enemies.at(k);
 		
 	}
-	this->end = false;
 	this->enemies.clear();
 	this->player->initPosition();
 }
@@ -579,4 +544,3 @@ std::vector<double> Game::imageToVectorC(unsigned width, unsigned height, Image 
 	return myVectorImage;
 
 }
-

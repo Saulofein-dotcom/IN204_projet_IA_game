@@ -8,13 +8,10 @@
 #include <iomanip>
 #include<vector>
 #include <algorithm>
-#include<torch/torch.h>
 
 #include "../../SFML-2.5.1/include/SFML/Graphics.hpp"
 
 using namespace sf;
-namespace T = torch;
-
 
 class Game
 {
@@ -64,14 +61,10 @@ public:
     // Fonctions
     void run();
 
-    void update(uint a);
-    void update(T::Tensor a);
-    void update(double up, double left, double down, double right, double nothing);
+    void update(int a);
     void updatePollEvents();
     void updateEnemies();
-    void updatePlayer(T::Tensor a);
-    void updatePlayer(uint a);
-    void updatePlayer(double up, double left, double down, double right, double nothing);
+    void updatePlayer(int a);
     void updateGUI();
     void updateClock();
 
@@ -81,14 +74,10 @@ public:
 
     void triggerEndOfGame();
 
-    auto actualState(uint nb_state);
-
     Image saveImage();
     std::vector<double> imageToVectorC(unsigned width, unsigned height, Image myImage);
 
-    auto step(double up, double left, double down, double right, double nothing, uint n_in);
-    auto step(uint action , uint n_in, uint timestep);
-    auto step(T::Tensor actions , uint n_in, uint timestep);
+    auto step(int action, std::vector<double> state, int width, int height, int nbColors, int stackFrame);
 
     void resetGame();
 
