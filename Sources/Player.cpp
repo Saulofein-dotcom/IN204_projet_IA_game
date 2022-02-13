@@ -1,4 +1,9 @@
 #include "./headers/Player.h"
+#include<random>
+
+// Random engine.
+std::random_device rdPlayer;
+std::mt19937 rePlayer(rdPlayer());
 
 // Init functions
 void Player::initVariables()
@@ -38,7 +43,10 @@ void Player::initSprite()
 
 void Player::initPosition()
 {
-    this->sprite.setPosition(this->window->getSize().x / 2, this->window->getSize().y / 2);
+    
+    std::uniform_int_distribution<> distX(20, this->window->getSize().x-20);
+    std::uniform_int_distribution<> distY(20, this->window->getSize().y-20);
+    this->sprite.setPosition(double(distX(rePlayer)), double(distY(rePlayer)));
     this->swordSprite.setPosition(
         this->getPosition().x + this->getBounds().width / 2,
         this->getPosition().y + this->getBounds().height / 2);
@@ -47,6 +55,7 @@ void Player::initPosition()
 // Constructors and destructors
 Player::Player()
 {
+
     this->initVariables();
     this->initTexture();
     this->initSprite();
@@ -200,7 +209,7 @@ void Player::update(uint action)
 
 void Player::update(double up, double left, double down, double right)
 {
-    float limit = .5;
+    float limit = 2;
     this->move(limit*(right - left), limit*(up - down));
 }
 

@@ -4,6 +4,9 @@
 #include <algorithm>
 #include <vector>
 #include <limits.h>
+#include <chrono>
+#include <thread>
+
 #include<torch/torch.h>
 #include"ppo_torch.cpp"
 #include "./create_plot/pbPlots.hpp"
@@ -31,38 +34,23 @@ double average(std::vector<A> const& v){
     return std::reduce(v.begin(), v.end()) / count;
 }
 
-auto Game::actualState(uint n_in)
-{
-	torch::Tensor next_state = T::zeros({1, n_in}, torch::kF64);
-	
-	next_state[0][0] = this->player->getPosition().x;
-	next_state[0][1] = this->player->getPosition().y;
 
-	for(int k = 0; k < this->enemies.size(); k++)
-	{
-		next_state[0][2 + 4*k] = this->enemies[k]->getPosition().x;
-		next_state[0][2 + 4*k + 1] = this->enemies[k]->getPosition().y;
-		next_state[0][2 + 4*k + 2] = this->enemies[k]->getDirection().x;
-		next_state[0][2 + 4*k + 3] = this->enemies[k]->getDirection().y;
-	}
-	for(int k = 2 + 4*this->enemies.size(); k < next_state.size(-1); k++)
-	{
-		next_state[0][k] = INT32_MAX;
-		next_state[0][k] = INT32_MAX;
-		next_state[0][k] = INT32_MAX;
-		next_state[0][k] = INT32_MAX;
-	}
-	return next_state;
-}
-
-auto Game::step(T::Tensor actions, uint n_in, uint timestep)
+auto Game::step(T::Tensor actions, long n_in, long timestep, T::Tensor& actualState, int width, int height, int frames)
 {
 	this->update(actions);
 	this->render();
 
-	torch::Tensor state = this->actualState(n_in);
+	torch::Tensor state = torch::zeros({1, n_in}, torch::kF64);
+	std::memcpy(state.data_ptr(), actualState.data_ptr() + width*height*sizeof(double), width*height*(frames-1) * sizeof(double));
+
+	Image imageCapture = this->saveImage();
+	T::Tensor compressedImage = imageToVectorC(width, height, imageCapture);
+	std::memcpy(state.data_ptr() + width*height*(frames-1)*sizeof(double), compressedImage.data_ptr(), width*height*sizeof(double));
+	
+
 	torch::Tensor done = torch::zeros({1, 1}, torch::kF64);
     STATUS status;
+	actualState = state;
 
 	if(timestep > 15000)
 	{
@@ -71,13 +59,14 @@ auto Game::step(T::Tensor actions, uint n_in, uint timestep)
 	}else if(this->end)
 	{
 		status = LOST;
-		done[0][0] = 1.0;
+		done[0][0] = 0.0;
+		this->end = false;
 	}else{
 		status=PLAYING;
 		done[0][0] = 0.0;
 	}
 
-	return std::make_tuple(state, status, done);
+	return std::make_tuple(actualState, status, done);
 
 }
 
@@ -91,7 +80,7 @@ auto Reward(int status) -> torch::Tensor
 			reward[0][0] += 1.;
 			break;
 		case WON:
-			reward[0][0] += 100.;
+			reward[0][0] += 1.;
 			printf("won, reward: %f\n", reward[0][0].item<double>());
 			break;
 		case LOST:
@@ -109,7 +98,7 @@ void Game::initWindow()
 	Set up the window, background, title, settings of the screen
 	*/
 	this->window = new RenderWindow(VideoMode(200, 200), "Link Revenge", Style::Close | Style::Titlebar);
-	//this->window->setFramerateLimit();
+	this->window->setFramerateLimit(120);
 	this->window->setVerticalSyncEnabled(false);
 }
 
@@ -176,10 +165,10 @@ Game::~Game()
 void Game::run()
 {
 	// Model.
-	int width = 80;
-	int height = 80;
+	int width = 100;
+	int height = 100;
 	int frames = 4;
-    u_int64_t n_in = width * height * frames;
+    long n_in = width * height * frames;
     uint n_out = 4;
     double std = 1e-2;
 
@@ -209,6 +198,7 @@ void Game::run()
     uint c = 0;
 	uint timestep = 0;
 	vector<double> score_history;
+	torch::Tensor state = torch::zeros({1, 0}, torch::kF64);
 
 	RGBABitmapImageReference *imageRef = CreateRGBABitmapImageReference();
 
@@ -216,12 +206,21 @@ void Game::run()
     double best_avg_reward = INT32_MIN;
     double avg_reward = 0.;
 
+	for(int i = 0; i < frames; i++)
+	{
+		this->update(T::zeros(n_out, torch::kF64));
+		this->render();
+		Image imageCapture = this->saveImage();
+		T::Tensor compressedImage = imageToVectorC(width, height, imageCapture);
+		state = T::cat({state, compressedImage}, 1);
+	}
+
 	for (uint e=1;e<=n_epochs;e++)
     {
 		printf("epoch %u/%u\n", e, n_epochs);
 		for (uint i=0;i<n_iter;i++)
         {
-			states.push_back(this->actualState(n_in));
+			states.push_back(state);
 
 			auto av = ac->forward(states[c]);
             actions.push_back(std::get<0>(av));
@@ -241,13 +240,15 @@ void Game::run()
 			}
 			*/
 
-			auto sd = this->step(actions[c][0], n_in, timestep);
+			auto sd = this->step(actions[c][0], n_in, timestep, state, width, height, frames);
 
 			// New state.
             rewards.push_back(Reward(std::get<1>(sd)));
             dones.push_back(std::get<2>(sd));
 
 			avg_reward += rewards[c][0][0].item<double>()/n_iter;
+
+			cout <<" avg_reward = " << avg_reward << endl;
 
             // episode, agent_x, agent_y, goal_x, goal_y, AGENT=(PLAYING, WON, LOST, RESETTING)
             
@@ -543,9 +544,9 @@ Image Game::saveImage()
 	return texture.copyToImage();
 }
 
-std::vector<double> Game::imageToVectorC(unsigned width, unsigned height, Image myImage)
+torch::Tensor Game::imageToVectorC(unsigned width, unsigned height, Image myImage)
 {
-	std::vector<double> myVectorImage(width * height);
+	torch::Tensor myVectorImage = T::zeros({1, width*height}, torch::kF64);
 	//std::vector<unsigned> myVectorImageColored(width * height*3);
 
 
@@ -561,16 +562,17 @@ std::vector<double> Game::imageToVectorC(unsigned width, unsigned height, Image 
 	{
 		for(long i = 0; i < width; i++)
 		{
-			unsigned red = myImage.getPixel(x_step*i, y_step*j).r;
-			unsigned green = myImage.getPixel(x_step*i, y_step*j).g;
-			unsigned blue = myImage.getPixel(x_step*i, y_step*j).b;
+			auto pixels = myImage.getPixel(x_step*i, y_step*j);
+			unsigned red = pixels.r;
+			unsigned green = pixels.g;
+			unsigned blue = pixels.b;
 			double gray = 0.299 * red + 0.587 * green + 0.114 * blue;
 
 			//myVectorImageColored[3 * j * width + 3 * i] = red;
 			//myVectorImageColored[3 * j * width + 3 * i + 1] = green;
 			//myVectorImageColored[3 * j * width + 3 * i + 2] = blue;
 
-			myVectorImage[j * width + i] = gray/255;
+			myVectorImage[0][j * width + i] = (double)gray/255;
 			//test.setPixel(i, j, Color(gray, gray, gray));
 		}
 	}

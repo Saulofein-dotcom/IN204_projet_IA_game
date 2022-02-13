@@ -84,11 +84,11 @@ public:
     auto actualState(uint nb_state);
 
     Image saveImage();
-    std::vector<double> imageToVectorC(unsigned width, unsigned height, Image myImage);
+    T::Tensor imageToVectorC(unsigned width, unsigned height, Image myImage);
 
     auto step(double up, double left, double down, double right, double nothing, uint n_in);
     auto step(uint action , uint n_in, uint timestep);
-    auto step(T::Tensor actions , uint n_in, uint timestep);
+    auto step(T::Tensor actions, long n_in, long timestep, T::Tensor& actualState, int width, int height, int frames);
 
     void resetGame();
 
