@@ -16,16 +16,16 @@ struct ActorCriticImpl : public torch::nn::Module
 
     ActorCriticImpl(int64_t n_in, int64_t n_out, double std)
         : // Actor.
-          a_lin1_(torch::nn::Linear(n_in, 64)),
-          a_lin2_(torch::nn::Linear(64, 128)),
-          a_lin3_(torch::nn::Linear(128, n_out)),
+          a_lin1_(torch::nn::Linear(n_in, 256)),
+          a_lin2_(torch::nn::Linear(256, 512)),
+          a_lin3_(torch::nn::Linear(512, n_out)),
           mu_(torch::full(n_out, 0.)),
           log_std_(torch::full(n_out, std)),
           
           // Critic
-          c_lin1_(torch::nn::Linear(n_in, 64)),
-          c_lin2_(torch::nn::Linear(64, 128)),
-          c_lin3_(torch::nn::Linear(128, n_out)),
+          c_lin1_(torch::nn::Linear(n_in, 256)),
+          c_lin2_(torch::nn::Linear(256, 512)),
+          c_lin3_(torch::nn::Linear(512, n_out)),
           c_val_(torch::nn::Linear(n_out, 1)) 
     {
         // Register the modules.

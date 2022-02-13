@@ -52,7 +52,7 @@ auto Game::step(T::Tensor actions, long n_in, long timestep, T::Tensor& actualSt
     STATUS status;
 	actualState = state;
 
-	if(timestep > 15000)
+	if(timestep > 150000)
 	{
 		status = WON;
 		done[0][0] = 1.0;
@@ -80,12 +80,12 @@ auto Reward(int status) -> torch::Tensor
 			reward[0][0] += 1.;
 			break;
 		case WON:
-			reward[0][0] += 1.;
+			reward[0][0] += 100.;
 			printf("won, reward: %f\n", reward[0][0].item<double>());
 			break;
 		case LOST:
 			reward[0][0] -= 100.;
-			printf("lost, reward: %f\n", reward[0][0].item<double>());
+			//printf("lost, reward: %f\n", reward[0][0].item<double>());
 			break;
 	}
 
@@ -162,6 +162,60 @@ Game::~Game()
 
 }
 
+void Game::runTest()
+{
+	// Model.
+	int width = 100;
+	int height = 100;
+	int frames = 8;
+    long n_in = width * height * frames;
+    uint n_out = 4;
+    double std = 1e-2;
+
+	ActorCritic ac(n_in, n_out, std);
+    ac->to(torch::kF64);
+    ac->normal(0., std);
+	ac->eval();
+    torch::load(ac, "../tmp/ppo/best_model.pt");
+
+	VT states;
+	VT actions;
+
+	uint n_iter =10000;
+
+	// Counter.
+    uint c = 0;
+	uint32_t timestep = 0;
+
+	torch::Tensor state = torch::zeros({1, 0}, torch::kF64);
+
+	for(int i = 0; i < frames; i++)
+	{
+		this->update(T::zeros(n_out, torch::kF64));
+		this->render();
+		Image imageCapture = this->saveImage();
+		T::Tensor compressedImage = imageToVectorC(width, height, imageCapture);
+		state = T::cat({state, compressedImage}, 1);
+	}
+
+	for (uint i=0;i<n_iter;i++)
+    {
+		auto av = ac->forward(state);
+        auto action = std::get<0>(av);
+
+        auto sd = this->step(action[0], n_in, timestep, state, width, height, frames);
+
+        // Check for done state.
+        auto done = std::get<2>(sd);
+
+        if (done[0][0].item<double>() == 1.) 
+        {
+            this->resetGame();
+        }
+    }
+
+}
+
 void Game::run()
 {
 	// Model.
@@ -180,7 +234,7 @@ void Game::run()
 	// Training loop.
     uint n_iter =10000;
     uint n_steps = 2048;
-    uint n_epochs = 500;
+    uint n_epochs = 5000;
     uint mini_batch_size = 512;
     uint ppo_epochs = 4;
     double beta = 1e-3;
@@ -217,12 +271,13 @@ void Game::run()
 
 	for (uint e=1;e<=n_epochs;e++)
     {
+		timestep = 0;
 		printf("epoch %u/%u\n", e, n_epochs);
 		for (uint i=0;i<n_iter;i++)
         {
 			states.push_back(state);
-
 			auto av = ac->forward(states[c]);
+
             actions.push_back(std::get<0>(av));
             values.push_back(std::get<1>(av));
             log_probs.push_back(ac->log_prob(actions[c]));
@@ -247,8 +302,6 @@ void Game::run()
             dones.push_back(std::get<2>(sd));
 
 			avg_reward += rewards[c][0][0].item<double>()/n_iter;
-
-			cout <<" avg_reward = " << avg_reward << endl;
 
             // episode, agent_x, agent_y, goal_x, goal_y, AGENT=(PLAYING, WON, LOST, RESETTING)
             
@@ -286,7 +339,10 @@ void Game::run()
                 returns.clear();
                 values.clear();
             }
+			timestep++;
 		}
+		cout << "avg_reward : " << avg_reward <<endl;
+		cout << timestep << endl;
 		// Save the best net.
         if (avg_reward > best_avg_reward) {
 

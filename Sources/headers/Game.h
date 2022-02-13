@@ -92,6 +92,8 @@ public:
 
     void resetGame();
 
+    void runTest();
+
     // Accessors
     std::vector<Enemy *> getEnemies();
 };
