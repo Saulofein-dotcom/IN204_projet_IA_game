@@ -7,24 +7,26 @@
 struct ActorCriticImpl : public torch::nn::Module 
 {
     // Actor.
-    torch::nn::Linear a_lin1_, a_lin2_, a_lin3_;
+    torch::nn::Linear a_lin1_, a_lin2_, a_lin3_, a_lin4_;
     torch::Tensor mu_;
     torch::Tensor log_std_;
 
     // Critic.
-    torch::nn::Linear c_lin1_, c_lin2_, c_lin3_, c_val_;
+    torch::nn::Linear c_lin1_, c_lin2_, c_lin3_, c_lin4_, c_val_;
 
     ActorCriticImpl(int64_t n_in, int64_t n_out, double std)
         : // Actor.
           a_lin1_(torch::nn::Linear(n_in, 256)),
           a_lin2_(torch::nn::Linear(256, 512)),
-          a_lin3_(torch::nn::Linear(512, n_out)),
+          a_lin3_(torch::nn::Dropout(0.5)),
+          a_lin4_(torch::nn::Linear(512, n_out)),
           mu_(torch::full(n_out, 0.)),
           log_std_(torch::full(n_out, std)),
           
           // Critic
           c_lin1_(torch::nn::Linear(n_in, 256)),
           c_lin2_(torch::nn::Linear(256, 512)),
+          c_lin3_(torch::nn::Dropout(0.5)),
           c_lin3_(torch::nn::Linear(512, n_out)),
           c_val_(torch::nn::Linear(n_out, 1)) 
     {
