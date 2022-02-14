@@ -35,9 +35,9 @@ double average(std::vector<A> const& v){
 }
 
 
-auto Game::step(T::Tensor actions, long n_in, long timestep, T::Tensor& actualState, int width, int height, int frames)
+auto Game::step(int action, long n_in, long timestep, T::Tensor& actualState, int width, int height, int frames)
 {
-	this->update(actions);
+	this->update(action);
 	this->render();
 
 	torch::Tensor state = torch::zeros({1, n_in}, torch::kF64);
@@ -167,7 +167,7 @@ void Game::runTest()
 	// Model.
 	int width = 100;
 	int height = 100;
-	int frames = 8;
+	int frames = 4;
     long n_in = width * height * frames;
     uint n_out = 4;
     double std = 1e-2;
@@ -203,7 +203,18 @@ void Game::runTest()
 		auto av = ac->forward(state);
         auto action = std::get<0>(av);
 
-        auto sd = this->step(action[0], n_in, timestep, state, width, height, frames);
+		uint actionChoose = 0;
+		double max_value = action[0][0].item<double>();
+		for(int i = 1; i < n_out; i++)
+		{
+			if(max_value < action[0][i].item<double>()) 
+			{
+				actionChoose = i;
+				max_value = action[0][i].item<double>();
+			}
+		}
+
+        auto sd = this->step(actionChoose, n_in, timestep, state, width, height, frames);
 
         // Check for done state.
         auto done = std::get<2>(sd);
@@ -221,7 +232,7 @@ void Game::run()
 	// Model.
 	int width = 100;
 	int height = 100;
-	int frames = 4;
+	int frames = 8;
     long n_in = width * height * frames;
     uint n_out = 4;
     double std = 1e-2;
@@ -282,7 +293,7 @@ void Game::run()
             values.push_back(std::get<1>(av));
             log_probs.push_back(ac->log_prob(actions[c]));
 			
-			/*
+			
 			uint action = 0;
 			double max_value = actions[c][0][0].item<double>();
 			for(int i = 1; i < n_out; i++)
@@ -293,9 +304,9 @@ void Game::run()
 					max_value = actions[c][0][i].item<double>();
 				}
 			}
-			*/
+			
 
-			auto sd = this->step(actions[c][0], n_in, timestep, state, width, height, frames);
+			auto sd = this->step(action, n_in, timestep, state, width, height, frames);
 
 			// New state.
             rewards.push_back(Reward(std::get<1>(sd)));
@@ -317,7 +328,7 @@ void Game::run()
                 printf("Updating the network.\n");
                 values.push_back(std::get<1>(ac->forward(states[c-1])));
 
-                returns = PPO::returns(rewards, dones, values, .99, .95);
+                returns = PPO::returns(rewards, dones, values, .99, .9);
 
                 torch::Tensor t_log_probs = torch::cat(log_probs).detach();
                 torch::Tensor t_returns = torch::cat(returns).detach();
@@ -386,7 +397,7 @@ void Game::update(T::Tensor a)
 	this->updatePlayer(a);
 	this->updateEnemies();
 }
-/*
+
 void Game::update(uint a)
 {
 	this->updateClock();
@@ -395,7 +406,7 @@ void Game::update(uint a)
 	this->updatePlayer(a);
 	this->updateEnemies();
 }
-*/
+
 
 void Game::updateClock()
 {
@@ -419,6 +430,21 @@ void Game::updateGUI()
 void Game::updatePlayer(T::Tensor a)
 {
 	this->player->update(a[0].item<double>(), a[1].item<double>(), a[2].item<double>(), a[3].item<double>()); // Move player, sword, udpdate fireballs
+
+	// TODO : refactoring + update sword collision according to player collision
+	if (this->player->getBounds().left < 0)
+		this->player->setPosition(0.f, this->player->getBounds().top);
+	else if (this->player->getBounds().left + this->player->getBounds().width > this->window->getSize().x)
+		this->player->setPosition(this->window->getSize().x - this->player->getBounds().width, this->player->getBounds().top);
+	if (this->player->getBounds().top + this->player->getBounds().height > this->window->getSize().y)
+		this->player->setPosition(this->player->getBounds().left, this->window->getSize().y - this->player->getBounds().height);
+	else if (this->player->getBounds().top < 0)
+		this->player->setPosition(this->player->getBounds().left, 0.f);
+}
+
+void Game::updatePlayer(uint a)
+{
+	this->player->update(a); // Move player, sword, udpdate fireballs
 
 	// TODO : refactoring + update sword collision according to player collision
 	if (this->player->getBounds().left < 0)
