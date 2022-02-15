@@ -88,7 +88,7 @@ public:
 
     auto step(double up, double left, double down, double right, double nothing, uint n_in);
     auto step(uint action , uint n_in, uint timestep);
-    auto step( int actions, long n_in, long timestep, T::Tensor& actualState, int width, int height, int frames);
+    auto step( int actions, long n_in, long timestep, T::Tensor& actualState, int width, int height, int frames, int);
 
     void resetGame();
 

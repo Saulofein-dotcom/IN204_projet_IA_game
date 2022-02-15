@@ -35,10 +35,13 @@ double average(std::vector<A> const& v){
 }
 
 
-auto Game::step(int action, long n_in, long timestep, T::Tensor& actualState, int width, int height, int frames)
+auto Game::step(int action, long n_in, long timestep, T::Tensor& actualState, int width, int height, int frames, int nbActions)
 {
-	this->update(action);
-	this->render();
+	for(int i = 0; i < nbActions ; i++)
+	{
+		this->update(action);
+		this->render();
+	}
 
 	torch::Tensor state = torch::zeros({1, n_in}, torch::kF64);
 	std::memcpy(state.data_ptr(), actualState.data_ptr() + width*height*sizeof(double), width*height*(frames-1) * sizeof(double));
@@ -164,6 +167,8 @@ Game::~Game()
 
 void Game::runTest()
 {
+	
+
 	// Model.
 	int width = 100;
 	int height = 100;
@@ -214,25 +219,29 @@ void Game::runTest()
 			}
 		}
 
-        auto sd = this->step(actionChoose, n_in, timestep, state, width, height, frames);
+        //auto sd = this->step(actionChoose, n_in, timestep, state, width, height, frames, dist(rng));
 
         // Check for done state.
-        auto done = std::get<2>(sd);
+        //auto done = std::get<2>(sd);
 
-        if (done[0][0].item<double>() == 1.) 
+        /*if (done[0][0].item<double>() == 1.) 
         {
             this->resetGame();
-        }
+        }*/
     }
 
 }
 
 void Game::run()
 {
+	std::random_device dev;
+    std::mt19937 rng(dev());
+    std::uniform_int_distribution<std::mt19937::result_type> dist(3,6);
+
 	// Model.
 	int width = 100;
 	int height = 100;
-	int frames = 8;
+	int frames = 4;
     long n_in = width * height * frames;
     uint n_out = 4;
     double std = 1e-2;
@@ -243,8 +252,8 @@ void Game::run()
     torch::optim::Adam opt(ac->parameters(), 1e-3);
 
 	// Training loop.
-    uint n_iter =10000;
-    uint n_steps = 2048;
+    uint n_iter =3000;
+    uint n_steps = 1000;
     uint n_epochs = 5000;
     uint mini_batch_size = 512;
     uint ppo_epochs = 4;
@@ -305,22 +314,23 @@ void Game::run()
 				}
 			}
 			
-
-			auto sd = this->step(action, n_in, timestep, state, width, height, frames);
+			
+			auto sd = this->step(action, n_in, timestep, state, width, height, frames, dist(rng));
 
 			// New state.
             rewards.push_back(Reward(std::get<1>(sd)));
             dones.push_back(std::get<2>(sd));
 
 			avg_reward += rewards[c][0][0].item<double>()/n_iter;
-
+			
             // episode, agent_x, agent_y, goal_x, goal_y, AGENT=(PLAYING, WON, LOST, RESETTING)
             
-
+			/*
             if (dones[c][0][0].item<double>() == 1.) 
             {
 				this->resetGame();
 			}
+			*/
 			c++;
 
 			if (c%n_steps == 0)
@@ -328,7 +338,7 @@ void Game::run()
                 printf("Updating the network.\n");
                 values.push_back(std::get<1>(ac->forward(states[c-1])));
 
-                returns = PPO::returns(rewards, dones, values, .99, .9);
+                returns = PPO::returns(rewards, dones, values, .99, .95);
 
                 torch::Tensor t_log_probs = torch::cat(log_probs).detach();
                 torch::Tensor t_returns = torch::cat(returns).detach();
