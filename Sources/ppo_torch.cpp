@@ -14,6 +14,9 @@ using namespace std;
 template<typename A>
 vector<A> appliedOn(vector<A> myVect, T::Tensor batch)
 {
+    /*
+        Create the python tool for arrays T[a:b], to choose a range of an array
+    */
     vector<A> myNewVect = {};
     for(int i = 0; i < batch.size(-1); i++)
     {
@@ -33,27 +36,13 @@ public:
     vector<bool> dones;
     long batch_size;
 
-    /*
-    template <typename T>
-    vector<T> arange(T begin, T end, int jump)
-    {
-        vector<T> myVector = {begin};
-        int tmp = begin + jump;
-        while (tmp < end)
-        {
-            myVector.push_back(tmp);
-            tmp += jump;
-        }
-        return myVector;
-    }
-    */
-
-    // random generator function:
-    //static int myrandom(int i) { return rand() % i; }
 
 public:
     PPO_Memory(long batch_size)
     {
+        /*
+            Initialize vectors and batch size
+        */
         this->states = vector<vector<double>>({});
         this->probs = vector<double>({});
         this->vals = vector<double>({});
@@ -66,12 +55,12 @@ public:
 
     auto generate_batches()
     {
-
+        /*
+            Generate a tensor with arrays of random indices 
+        */
         long n_states = this->states.size();
 
         T::Tensor batch_start = T::arange(0, n_states, this->batch_size);
-
-        //T::Tensor indices = T::arange(0, n_states, 1);
 
         T::Tensor random_indices = T::randperm(n_states);
         vector<T::Tensor> batches = {};
@@ -79,7 +68,6 @@ public:
         if(this->states.size()==0)
         {
             cout << "states of size 0" << endl;
-            //exit(0); 
         }
         else
         {
@@ -102,11 +90,14 @@ public:
                           this->vals,
                           this->rewards,
                           this->dones,
-                          batches); // tie(x, c, v, b, f, g, test) = ppo_memory.generate_batches()
+                          batches); 
     }
 
     vector<double> tensorToVector(T::Tensor state)
     {
+        /*
+            Transform a tensor into a vector
+        */
         vector<double> myVec(state.size(-1));
         for(int i = 0; i < state.size(-1) ; i++)
         {
@@ -117,18 +108,25 @@ public:
 
     void store_memory(T::Tensor state, c10::Scalar action, c10::Scalar probs, c10::Scalar vals, double reward, bool done)
     {
+        /*
+            Store the last values of state, action, probs, vals, reward and done
+        */
        
-       this->states.push_back(tensorToVector(state));
-       this->actions.push_back(action.to<int>());
-       this->probs.push_back(probs.to<double>());
-       this->vals.push_back(vals.to<double>());
-       this->rewards.push_back(reward);
-       this->dones.push_back(done);
+        this->states.push_back(tensorToVector(state));
+        this->actions.push_back(action.to<int>());
+        this->probs.push_back(probs.to<double>());
+        this->vals.push_back(vals.to<double>());
+        this->rewards.push_back(reward);
+        this->dones.push_back(done);
         
     }
 
     void clear_memory()
     {
+        /*
+            Clear the vectors
+        */
+
         this->states = vector<vector<double>>({});
         this->probs = vector<double>({});
         this->vals = vector<double>({});
@@ -151,6 +149,9 @@ public:
 
     ActorNetwork(long int n_actions, int input_dims, double alpha, long int fc1_dims=256, long int fc2_dims=256, string chkpt_dir = "../tmp/ppo") : nn::Module()
     {
+        /*
+            Initialize the neural network
+        */
         this->checkpoint_file = chkpt_dir;
         this->checkpoint_file += "/actor_torch_ppo.pt";
         actor = nn::Sequential(
@@ -159,7 +160,7 @@ public:
             nn::Linear(fc1_dims, fc2_dims),
             nn::ReLU(),
             nn::Linear(fc2_dims, n_actions),
-            nn::Softmax(-1) // Comment on met dim = -1 en argument ?
+            nn::Softmax(-1)
         );
         this->optimizer = new optim::Adam(this->parameters(), T::optim::AdamOptions(alpha));
         this->device = new T::Device(T::cuda::is_available() ? T::kCUDA : T::kCPU);
@@ -169,14 +170,21 @@ public:
     
     T::Tensor forward(T::Tensor state)
     {
+        /*
+            Feeds the state input to the first module and then chains outputs to inputs, returning the last output
+        */
+
         T::Tensor dist = this->actor->forward(state);
-        
         return dist;
     }
     
 
     void save_checkpoint()
     {
+        /*
+            Save the neural network to the file this->checkpoint_file
+        */
+
         T::serialize::OutputArchive output_archive;
         this->actor->save(output_archive);
         output_archive.save_to(this->checkpoint_file);
@@ -184,6 +192,10 @@ public:
 
     void load_checkpoint()
     {
+        /*
+            Load the neural network from the file this->checkpoint_file
+        */
+
         T::load(this->actor, this->checkpoint_file);
     }
 };
@@ -201,6 +213,9 @@ class CriticNetwork : public nn::Module
     public:
         CriticNetwork(long long input_dims, double alpha, long fc1_dims=256, long fc2_dims=256, string chkpt_dir="../tmp/ppo" ) : nn::Module()
         {
+            /*
+                Initialize the neural network
+            */
             this->checkpoint_file = chkpt_dir + "/critic_torch_ppo.pt";
             this->critic = nn::Sequential(
                                     nn::Linear(input_dims, fc1_dims),
@@ -217,13 +232,20 @@ class CriticNetwork : public nn::Module
 
         T::Tensor forward(T::Tensor state)
         {
-            
+            /*
+                Feeds the state input to the first module and then chains outputs to inputs, returning the last output
+            */  
+
             T::Tensor tmp = this->critic->forward(state);
             return tmp;
         }
 
         void save_checkpoint()
         {
+            /*
+                Save the neural network to the file this->checkpoint_file
+            */
+
             T::serialize::OutputArchive output_archive;
             this->critic->save(output_archive);
             output_archive.save_to(this->checkpoint_file);
@@ -231,6 +253,10 @@ class CriticNetwork : public nn::Module
 
         void load_checkpoint()
         {
+            /*
+                Load the neural network from the file this->checkpoint_file
+            */
+
             T::load(this->critic, this->checkpoint_file);
         }
 
@@ -253,6 +279,10 @@ class Agent
         Agent(long n_actions, long input_dims, double gamma=0.99, double alpha=0.0003, double gae_lambda=0.95,
                 double policy_clip=0.2, long batch_size=64, long n_epochs=10, long N=2048)
         {
+            /*
+                Initialize the agent
+            */
+
             this->gamma = gamma;
             this->policy_clip = policy_clip;
             this->n_epochs = n_epochs;
@@ -269,6 +299,11 @@ class Agent
 
         T::Tensor sampleAction(T::Tensor dist)
         {
+            /*
+                The argument is a distribution of probabilities of the actions
+                The function choose an action according to this distribution
+            */
+
             random_device rd;  // Will be used to obtain a seed for the random number engine
             mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
             uniform_real_distribution<> dis(0.0, 1.0);
@@ -296,11 +331,18 @@ class Agent
         
         void remember(T::Tensor state, c10::Scalar action, c10::Scalar probs, c10::Scalar vals, double reward, bool done)
         {
+            /*
+                Store the state of the agent
+            */
+
             this->memory->store_memory(state, action, probs, vals, reward, done);
         }
 
         void save_models()
         {
+            /*
+                Save the model
+            */
             cout << "...saving models..." << endl;
             this->actor->save_checkpoint();
             this->critic->save_checkpoint();
@@ -309,6 +351,10 @@ class Agent
 
         void load_models()
         {
+            /*
+                Load the model
+            */
+
             cout << "...loading models..." << endl;
             this->actor->load_checkpoint();
             this->critic->load_checkpoint();
@@ -318,9 +364,11 @@ class Agent
         
         auto choose_action(T::Tensor observation)
         {
-            
+            /*
+                Choose an action and return the reward of the action
+            */
+
             T::Tensor state = observation.to(*this->actor->device);
-            
             
             T::Tensor dist = this->actor->actor->forward(state);
             T::Tensor value = this->critic->critic->forward(state);
@@ -348,36 +396,33 @@ class Agent
         
         void learn()
         {
+            /*
+                Learning loop of the agent
+            */
             for(int NULL_VAR = 0; NULL_VAR < this->n_epochs; NULL_VAR++)
             {
+                // First we generate a batch
                 vector<vector<double>> state_arr;
                 vector<double> old_prob_arr;
                 vector<double> vals_arr;
                 vector<int> action_arr;
                 vector<double> reward_arr;
                 vector<bool> dones_arr;
-
                 vector<T::Tensor> batches;
                 tie(state_arr, action_arr, old_prob_arr, vals_arr,
                     reward_arr, dones_arr, batches) = this->memory->generate_batches();
 
-                
-
                 vector<double> values = vals_arr;
                 T::Tensor advantage = T::zeros(reward_arr.size(), T::dtype(T::kFloat32));
 
-                
-                
                 for(int t = 0; t < reward_arr.size() - 1; t++)
                 {
-                    
                     double discount = 1;
                     double a_t = 0;
                     for(int k = t; k < reward_arr.size() - 1; k++)
                     { 
-
+                        // We compute the advantage
                         a_t += discount*(reward_arr[k] + this->gamma*values[k+1] * (1 - dones_arr[k]) - values[k]);
-
                         discount *= this->gamma * this->gae_lambda;
                     }
                     advantage[t] = a_t;
@@ -390,8 +435,8 @@ class Agent
 
                 for(int i = 0; i < batches.size() ; i++)
                 {
+                    // For each batch of indices
                     T::Tensor batch = batches[i];
-
                     vector<vector<double>> myArray = appliedOn(state_arr, batch);
                     
                     auto options = torch::TensorOptions().dtype(at::kFloat);
@@ -399,23 +444,21 @@ class Agent
                     long m = myArray[0].size();
                     T::Tensor states = torch::zeros({n, m}, options);
                     for (int i = 0; i < n; i++)
-                        states.slice(0, i,i+1) = torch::from_blob(myArray[i].data(), {m}, options);
+                        states.slice(0, i,i+1) = torch::from_blob(myArray[i].data(), {m}, options);  // Copy elements of myArray to states
                     
                     states = states.to(*this->actor->device);
                     T::Tensor old_probs = T::tensor(appliedOn(old_prob_arr,batch)).to(*this->actor->device);
                     T::Tensor actions = T::tensor(appliedOn(action_arr,batch)).to(*this->actor->device);
                     T::Tensor dist = this->actor->actor->forward(states);
 
-                    T::Tensor critic_value = this->critic->critic->forward(states);
+                    // We compute the critic value from the critic network
+                    T::Tensor critic_value = this->critic->critic->forward(states); 
                     critic_value = T::squeeze(critic_value);
-                    
                     
                     T::Tensor new_probs = T::zeros(actions.size(-1));
                     for(int i = 0; i < actions.size(-1); i++) new_probs[i] = log(dist[i][actions[i]]);
                     
-                    T::Tensor prob_ratio = new_probs.exp() / old_probs.exp();
-                    
-                    
+                    T::Tensor prob_ratio = new_probs.exp() / old_probs.exp(); 
                     
                     T::Tensor advantage_batch = appliedOnTensor(advantage, batch);
 
@@ -428,10 +471,8 @@ class Agent
                     T::Tensor returns = advantage_batch + valuesToReturnBatch;
                     
                     T::Tensor critic_loss = (returns - critic_value)*(returns - critic_value);
-                    
                     critic_loss = critic_loss.mean();
                      
-
                     T::Tensor total_loss = actor_loss + 0.5 * critic_loss;
                     this->actor->optimizer->zero_grad();
                     this->critic->optimizer->zero_grad();
@@ -440,8 +481,8 @@ class Agent
                     this->critic->optimizer->step();
                     
                 }
-                
             }
+            // At the end of each epoch, we clear the memory
             this->memory->clear_memory();
             
         }
