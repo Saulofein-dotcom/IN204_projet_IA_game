@@ -12,6 +12,10 @@ using namespace sf;
 
 class Player
 {
+    /*
+        This is the player class which handles the movements of the player and the sword, and the fireballs that the player can shoot.
+    */
+
 private:
     // Fenêtre
     RenderWindow *window;

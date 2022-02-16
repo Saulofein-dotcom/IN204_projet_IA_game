@@ -13,6 +13,10 @@ using namespace sf;
 
 class Game
 {
+    /*
+        The Game class implements most of the game logic such as handling, the windows, the keyboard events, updating the different characters, rendering on the screen.
+    */
+
 private:
     // Fenêtre
     RenderWindow *window;

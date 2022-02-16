@@ -3,6 +3,9 @@
 
 int main()
 {
+	/*
+		Main function that starts the game
+	*/
 	srand(time(static_cast<unsigned>(0)));
 
 	Game game;

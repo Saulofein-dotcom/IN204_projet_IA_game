@@ -3,6 +3,10 @@
 // Init functions
 void Player::initVariables()
 {
+    /*
+        Initializes the variables of the player
+    */
+
     this->moveSpeed = 10.f; // nombre de pixels parcoururs par appui sur une touche
     this->attackCoolDownMax = 10.f;
     this->attackCoolDown = this->attackCoolDownMax;
@@ -10,6 +14,10 @@ void Player::initVariables()
 
 void Player::initTexture()
 {
+    /*
+        Initializes the textures of the player and the sword.
+    */
+
     // Load texture from file
     if (!this->texture.loadFromFile("../../Textures/link_standing.png"))
     {
@@ -24,6 +32,10 @@ void Player::initTexture()
 
 void Player::initSprite()
 {
+    /*
+        Initializes the sprite of the player and the sword.
+    */
+
     // Set texture to sprite
     this->sprite.setTexture(this->texture);
     this->swordSprite.setTexture(this->swordTexture);
@@ -36,7 +48,13 @@ void Player::initSprite()
 
 void Player::initPosition()
 {
-    this->sprite.setPosition(this->window->getSize().x / 2, this->window->getSize().y / 2);
+    /*
+        Initializes the position of the player and the sword.
+    */
+
+    this->sprite.setPosition(
+        this->window->getSize().x / 2,
+        this->window->getSize().y / 2);
     this->swordSprite.setPosition(
         this->getPosition().x + this->getBounds().width / 2,
         this->getPosition().y + this->getBounds().height / 2);
@@ -45,6 +63,9 @@ void Player::initPosition()
 // Constructors and destructors
 Player::Player()
 {
+    /*
+        Default constructor of the Player Class which initializes all the variables of the player.
+    */
     this->initVariables();
     this->initTexture();
     this->initSprite();
@@ -53,6 +74,9 @@ Player::Player()
 
 Player::Player(RenderWindow *window)
 {
+    /*
+        Constructor of the Player Class which initializes all the variables of the player and sets a variable as a reference to the window.
+    */
     this->window = window;
     this->initVariables();
     this->initTexture();
@@ -62,6 +86,11 @@ Player::Player(RenderWindow *window)
 
 Player::~Player()
 {
+    /*
+        Destructor of the Player Class.
+        Deletes all of the fireballs to free the memory.
+    */
+
     // Delete fireballs
     for (auto *fireball : this->fireballs)
         delete fireball;
@@ -70,12 +99,20 @@ Player::~Player()
 // Functions
 void Player::renderPlayer(RenderTarget &target)
 {
+    /*
+        Draws the sword and the player on screen
+    */
+
     target.draw(this->swordSprite);
     target.draw(this->sprite);
 }
 
 void Player::renderFireballs(RenderTarget &target)
 {
+    /*
+        Draws all the fireballs on screen.
+    */
+
     for (auto *fireball : this->fireballs)
     {
         fireball->renderFireball(target);
@@ -84,11 +121,18 @@ void Player::renderFireballs(RenderTarget &target)
 
 void Player::move(const float dirX, const float dirY)
 {
+    /*
+        Moves the player at a constant speed in the direction given as an argument.
+    */
+
     this->sprite.move(this->moveSpeed * dirX, this->moveSpeed * dirY);
 }
 
 void Player::shootFireballs()
 {
+    /*
+
+    */
     Vector2f direction = this->getMouseDirection();
     Vector2f swordPosition = this->swordSprite.getPosition();
     this->fireballs.push_back(new Fireball(

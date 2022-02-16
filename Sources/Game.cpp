@@ -3,7 +3,7 @@
 void Game::initWindow()
 {
 	/*
-	Set up the window, background, title, settings of the screen
+		Sets up the window, background, title, settings of the screen
 	*/
 	this->window = new RenderWindow(VideoMode(1300, 900), "Link Revenge", Style::Close | Style::Titlebar);
 	this->window->setFramerateLimit(60);
@@ -13,7 +13,7 @@ void Game::initWindow()
 void Game::initWorld()
 {
 	/*
-	Set up the background texture
+		Sets up the background texture
 	*/
 	if (!this->worldBackgroundTexture.loadFromFile("../../Textures/background.png"))
 		std::cout << "ERROR::GAME::Failed to load background texture \n";
@@ -23,7 +23,7 @@ void Game::initWorld()
 void Game::initPlayer()
 {
 	/*
-	Set up the player
+		Sets up the player
 	*/
 	this->player = new Player(this->window);
 }
@@ -31,7 +31,7 @@ void Game::initPlayer()
 void Game::initEnemies()
 {
 	/*
-	Initialize variables of the enemies
+		Initializes the variables of the enemies
 	*/
 	this->spawnTimerMax = 25.f;
 	this->spawnTimer = this->spawnTimerMax;
@@ -42,6 +42,10 @@ void Game::initEnemies()
 
 void Game::initGUI()
 {
+	/*
+		Initializes the game user interface such as the timer.
+	*/
+
 	// Load font
 	if (!this->font.loadFromFile("../../Fonts/ARCADE.TTF"))
 		std::cout << "ERROR::GAME::Failed to load font\n";
@@ -53,7 +57,7 @@ void Game::initGUI()
 	this->timeText.setString("00:00");
 	this->timeText.setPosition(30.f, 10.f);
 
-	// Init gameOverText
+	// Init gameOverText --> not completed because it's useless for the AI
 	this->gameOverText.setFont(this->font);
 	this->gameOverText.setCharacterSize(60);
 	this->gameOverText.setFillColor(sf::Color::Red);
@@ -65,11 +69,17 @@ void Game::initGUI()
 
 void Game::initClock()
 {
+	/*
+		Starts the timer of the clock
+	*/
 	this->clock.restart();
 }
 
 Game::Game()
 {
+	/*
+		Constructor of the Game class which initialize the window, world, UI, Player, Enemies, Clock variables;
+	*/
 	this->initWindow();
 	this->initWorld();
 	this->initGUI();
@@ -80,14 +90,18 @@ Game::Game()
 
 Game::~Game()
 {
+	/*
+		Game destructor, deletes the window, player, fireballs and enemies instances to free the memory.
+	*/
 	delete this->window; // Delete window
 	delete this->player; // Delete player and fireballs
 
-	// Delete enemies
+	// Delete skeleton enemies
 	for (auto *i : this->enemies)
 	{
 		delete i;
 	}
+	// Delete rocks
 	for (auto *i : this->enemiesRock)
 	{
 		delete i;
@@ -96,6 +110,11 @@ Game::~Game()
 
 void Game::run()
 {
+	/*
+		Function that implements the main loop of the game.
+		While the window is open, the game is running.
+		At each loop, first you update the game, then you render all sprites on the screen.
+	*/
 	while (this->window->isOpen())
 	{
 		this->update();
@@ -105,6 +124,9 @@ void Game::run()
 
 void Game::update()
 {
+	/*
+		Main update function of the game which calls update functions of other instances such as the Clock, the user interface, the events, the player and the enemies.
+	*/
 	this->updateClock();
 	this->updateGUI();
 	this->updatePollEvents();
@@ -114,11 +136,17 @@ void Game::update()
 
 void Game::updateClock()
 {
+	/*
+		Updates the timer of the current running clock.
+	*/
 	this->elapsedTime = this->clock.getElapsedTime();
 }
 
 void Game::updateGUI()
 {
+	/*
+		Updates the timer of the user interface with the elapsed time.
+	*/
 	std::stringstream ss;
 	ss << std::setw(2)
 	   << std::setfill('0')
@@ -133,9 +161,13 @@ void Game::updateGUI()
 
 void Game::updatePlayer()
 {
-	this->player->update(); // Move player, sword, udpdate fireballs
+	/*
+		Function handling part of the updates of the player.
+		First it calls the update function of the player, then it handles the collision of the player with the bounds of the window.
+	*/
+	this->player->update(); // Moves player, sword, udpdate fireballs.
 
-	// TODO : refactoring + update sword collision according to player collision
+	// Remark : we could improve this part by refactoring it or moving it to the player update function
 	if (this->player->getBounds().left < 0)
 		this->player->setPosition(0.f, this->player->getBounds().top);
 	else if (this->player->getBounds().left + this->player->getBounds().width > this->window->getSize().x)
@@ -149,7 +181,7 @@ void Game::updatePlayer()
 void Game::updatePollEvents()
 {
 	/*
-		Get events to close the window
+		Gets events to close the window
 	*/
 	Event e;
 	while (this->window->pollEvent(e))
@@ -163,13 +195,18 @@ void Game::updatePollEvents()
 
 void Game::updateEnemies()
 {
-	// Spawning enemies
+	/*
+		Function handling the spawning of the enemies as well as their respective movements and their collision with the player.
+		This part could be improved with some refactoring or moving it to the enemies classes.
+	*/
+
+	// Spawning enemies : skeletons and rocks with different timers
 	this->spawnTimer += 0.5f;
 	this->spawnTimerRock += 0.5f;
 
 	if (this->spawnTimer > spawnTimerMax)
 	{
-		int randomWindow = rand() % 4; // If randomLateral == 0, the enemy spawn on the left of the screen, otherwise on the right
+		int randomWindow = rand() % 4; // If randomWindow == 0, the enemy spawn on the left of the screen, otherwise on the right
 		float posX = 10.f;
 		float posY = 10.f;
 		if (randomWindow == 0) // Left
@@ -208,7 +245,7 @@ void Game::updateEnemies()
 		this->spawnTimerRock = 0.f;
 	}
 
-	// Update position of skeleton enemies
+	// Updates position of skeleton enemies
 	bool enemy_removed = false;
 	for (int i = 0; i < this->enemies.size(); ++i)
 	{
@@ -250,6 +287,7 @@ void Game::updateEnemies()
 		enemy_removed = false;
 	}
 
+	// Updates position of the rocks
 	int counter = 0;
 	for (auto *enemy : this->enemiesRock)
 	{
@@ -284,6 +322,9 @@ void Game::triggerEndOfGame()
 // Accessors
 std::vector<Enemy *> Game::getEnemies()
 {
+	/*
+		Returns the list of enemies.
+	*/
 	return this->enemies;
 }
 
@@ -294,29 +335,38 @@ void Game::renderWorld()
 
 void Game::renderGUI()
 {
+	/*
+		Draw the user interface on screen.
+	*/
 	this->window->draw(this->timeText);
 }
 
 void Game::render()
 {
+	/*
+		Function handling the rendering of the different sprites on the screen.
+		The order of rendering is important as the last sprite rendered is above the others.
+	*/
+
 	// Clear the screen
 	this->window->clear();
 
-	// Draw background
+	// Draw the background
 	this->renderWorld();
 
-	// Draw Player
+	// Draw the Player
 	this->player->renderPlayer(*this->window);
 
-	// Draw Fireballs
+	// Draw the Fireballs
 	this->player->renderFireballs(*this->window);
 
-	// Draw enemies
+	// Draw rock enemies
 	for (auto *enemy : this->enemiesRock)
 	{
 		enemy->render(this->window);
 	}
 
+	// Draw skeleton enemies
 	for (auto *enemy : this->enemies)
 	{
 		enemy->render(this->window);

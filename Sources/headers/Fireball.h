@@ -11,7 +11,7 @@ using namespace sf;
 class Fireball
 {
 private:
-    // Variables du projectile
+    // Fierablls variables
     float speed;
     Vector2f direction;
 
