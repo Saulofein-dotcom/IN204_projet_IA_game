@@ -153,6 +153,12 @@ Game::~Game()
 
 void Game::run()
 {
+	random_device rd;  // Will be used to obtain a seed for the random number engine
+    mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
+    uniform_real_distribution<> dis(-0.05, 0.05);
+	uniform_int_distribution<> disInt(3, 6);
+
+	// Preprocess parameters
 	int width = 150;
 	int height = 150;
 	int frame = 0;
@@ -160,10 +166,7 @@ void Game::run()
 	int nbColors = 1;
 	vector<double> state(stackNumber*width*height*nbColors);
 
-	random_device rd;  // Will be used to obtain a seed for the random number engine
-    mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
-    uniform_real_distribution<> dis(-0.05, 0.05);
-	uniform_int_distribution<> disInt(3, 6);
+	// Model
 	int N = 10;
     int batch_size = 2048;
     int n_epochs = 5;
@@ -173,13 +176,13 @@ void Game::run()
     double gamma = 0.99;
     double gae_lambda = 0.95;
     double policy_clip = 0.2;
+	int n_games = 300000;
 
 	RGBABitmapImageReference *imageRef = CreateRGBABitmapImageReference();
 
 	Agent agent = Agent(action_space_n, observation_space_shape, gamma, alpha, gae_lambda, policy_clip, batch_size, n_epochs);
-	int n_games = 300000;
-
-	vector<long> score_history;
+	
+	vector<long> score_history; // scores of the agent
     
     double best_score = -100000;
     long learn_iters = 0;
@@ -188,15 +191,14 @@ void Game::run()
 
 	for(int i = 0; i < n_games ; i++)
     {
+		// Reset the game at the beginning of each game
 		int time = 0;
 		this->resetGame();
-		
         bool done = false;
 		this->end = false;
 		frame = 0;
 
-		
-
+		// Loop to store 5 frames in the state vector
 		while(frame < stackNumber)
 		{
 			this->update(5);
@@ -210,20 +212,18 @@ void Game::run()
 		}
 		frame = 0;
         T::Tensor observation = T::tensor(state).unsqueeze(0);
-
         long score = 0;
+
+		// While we don't die
         while(!done)
         {
-			
+			// We choose an action according to the observation
             c10::Scalar action ,prob, val;
             tie(action, prob, val) = agent.choose_action(observation);
-			
-
             double reward;
-			
-			
             T::Tensor observation_;
 
+			// Each action is repeatedly performed for a duration of k frames, where k is uniformly sampled from {3, 4, 5, 6}
 			int nbFrameStep = disInt(gen);
 			for(int k = 0 ; k < nbFrameStep; k++)
 			{
@@ -232,30 +232,31 @@ void Game::run()
             	score += reward;
 			}
             
-			
+			// We store all variables in the memory
             agent.remember(observation, action, prob, val, reward, done);
 			
+			// We update the neural network each N steps
             if(n_steps % N == 0)
             {
-				
                 agent.learn();
                 learn_iters += 1;
             }
 			time ++;
             observation = observation_;
+
+			// If we survive for 600 time steps, the agent earn a reward of +100 
 			if(time > 600) 
 			{
 				done = true;
 				score += 100;
 			}
-
-
         }
         score_history.push_back(score);
+
+		// We only save the model if it is the best model
         int minValue;
         score_history.size() < 100 ? minValue = score_history.size() : minValue = 100;
         vector<int64_t> score_tmp(score_history.end() - minValue, score_history.end());
-        
         double avg_score = average(score_tmp);
         if(avg_score > best_score)
         {
