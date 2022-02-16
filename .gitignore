@@ -4,7 +4,8 @@
 /Sources/build
 /Sources/*.txt
 /Sources/test_*
-/tmp
+/tmp/ppo/*.pt
+/tmp/ppopy/*
 build.sh
-/Sources/ppopy/
+/Sources/tmp/*
 /Sources/create_plot
