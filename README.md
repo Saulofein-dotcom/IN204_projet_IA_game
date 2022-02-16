@@ -1,4 +1,4 @@
-# IN204 - Reinforcement Learning dans un jeu vidéo
+# IN204 - Reinforcement Learning dans un jeu vidéo en C++
 
 ## Le jeu
 Vous contrôlez un joueur qui peut se déplacer suivant les quatres directions (HAUT, BAS, GAUCHE, DROITE). Avec votre souris vous pouvez diriger une épée et tirer pour tuer les ennemis bleus. Les roches qui tombent doivent être esquiver, on peut anticiper leur point d'impact grâce à leur ombre.<br />
@@ -111,5 +111,13 @@ Après cela, l'exécutable `game-app` a été crée dans le dossier build et vou
 ```
 
 ## Compiler le jeu avec l'IA
+Le jeu avec l'IA se trouve sur la branche IA `git checkout IA`, il suffit d'aller dans le dossier IN204_projet_IA_game/Sources/build et de faire :
 
+```
+cmake ..
+make
+```
+
+Pour lancer l'entraînement, il suffit d'ouvrir l'exécutable `./game-app`. <br />
+**Il se peut que le programme s'interrompt car il ne trouve pas les fichiers critic_torch_ppo.pt et actor_torch_ppo.pt. Il faut les créer dans le dossier IN204_projet_IA_game/Sources/tmp/ppo avec les commandes `touch critic_torch_ppo.pt` et `touch actor_torch_ppo.pt`**
 
