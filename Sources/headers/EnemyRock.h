@@ -11,6 +11,11 @@ using namespace sf;
 
 class EnemyRock
 {
+
+    /*
+        The EnemyRock class implements the behavior of the rocks falling on the ground. The EnemyRock is dangerous for the players a short time before it hits the ground. When the player hits a rock, the game ends.
+    */
+
 protected:
     Sprite sprite;
     Texture *texture;

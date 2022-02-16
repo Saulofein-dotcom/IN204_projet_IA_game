@@ -10,6 +10,10 @@ using namespace sf;
 
 class Enemy
 {
+    /*
+        The Enemy class implements skeletons enemies who can hit the player and end the game during a collision. Their behavior is straightforward : they move in a line and are deleted when they are out of borders.
+    */
+
 protected:
     Sprite sprite;
     Texture *texture;

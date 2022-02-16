@@ -131,7 +131,7 @@ void Player::move(const float dirX, const float dirY)
 void Player::shootFireballs()
 {
     /*
-
+        Shoots a fireball in the direction of the mouse at a constant speed.
     */
     Vector2f direction = this->getMouseDirection();
     Vector2f swordPosition = this->swordSprite.getPosition();
@@ -170,22 +170,38 @@ void Player::updateFireballs()
 
 void Player::updateSwordPosition()
 {
+    /*
+        Updates the position of the sword so it follows the movement of the player.
+    */
     this->swordSprite.setPosition(this->getBounds().left + this->getBounds().width / 2, this->getBounds().top + this->getBounds().height / 2);
 }
 
 void Player::updateAttack()
 {
+    /*
+        Updates the cooldown of the attack.
+    */
+
     if (this->attackCoolDown < this->attackCoolDownMax)
         this->attackCoolDown += 1.f;
 }
 
 void Player::updateSwordRotation()
 {
+    /*
+        Updates the rotation of the sword so it follows the direction of the mouse.
+    */
     this->swordSprite.setRotation(this->getRotationAngle(this->getMouseDirection().x, this->getMouseDirection().y));
 }
 
 void Player::update()
 {
+    /*
+        Update function of the player.
+        It listens for keyboard inputs and moves the player or shoots a fireball according to the key pressed.
+        Calls the update function of the cooldown timer, updates the fireballs, updates the sword rotation, updates the sword position.
+    */
+
     // Update Position
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Z))
         this->move(0.f, -1.f);
@@ -216,6 +232,10 @@ void Player::update()
 
 const bool Player::canAttack()
 {
+    /*
+        Returns true if the cooldown timer allows for another attack.
+    */
+
     if (this->attackCoolDown >= attackCoolDownMax)
     {
         this->attackCoolDown = 0.f;
@@ -227,27 +247,42 @@ const bool Player::canAttack()
 // Setters
 void Player::setPosition(sf::Vector2f position)
 {
+    /*
+        Sets a new position for the player.
+    */
     this->sprite.setPosition(position);
 }
 
 void Player::setPosition(float x, float y)
 {
+    /*
+        Sets a new position for the player.
+    */
     this->sprite.setPosition(x, y);
 }
 
 // Getters
 std::vector<Fireball *> Player::getFireballs()
 {
+    /*
+        Returns a list of fireballs active.
+    */
     return this->fireballs;
 }
 
 Vector2f Player::getPosition()
 {
+    /*
+        Returns the position of the player in a vector of floats.
+    */
     return this->sprite.getPosition();
 }
 
 Vector2f Player::getMouseDirection()
 {
+    /*
+        Returns the direction of the mouse with a normalized 2d vector of floats.
+    */
     Vector2f mouseDirection;
     float mouseX = Mouse::getPosition(*this->window).x;
     float mouseY = Mouse::getPosition(*this->window).y;
@@ -262,6 +297,10 @@ Vector2f Player::getMouseDirection()
 
 float Player::getRotationAngle(float X, float Y)
 {
+    /*
+        Returns the angle in degrees between the mouse direction and the horizontal axis.
+    */
+
     if (Y > 0)
         return std::acos(X) * 180.0f / 3.1415 - 90.f;
     else
