@@ -14,17 +14,17 @@ Si un rocher ou un ennemi bleu vous touche, la partie se termine et la fenêtre 
 ![](Images/Jeu.png)
 
 ## L'algorithme
-Nous avons décidé d'implémenter l'algorithme PPO pour créer un agent qui appennent à jouer à notre jeu. Dans notre environnement, l'observation est une image RGB de l'écran de jeu de taille (1300, 800, 3). Les récompenses sont calculées ainsi : +1 pour chaque pas de temps où l'agent est en vie, -100 s'il touche un ennemi, +100 si l'agent réussi à survivre à un certains nombre de pas de temps. Chaque action est répété k fois, où k est un entier choisi de manière aléatoire entre 3 et 6. Notre but est de maximiser la récompense. <br />
+Nous avons décidé d'implémenter l'algorithme PPO pour créer un agent qui apprend à jouer à notre jeu. Dans notre environnement, l'observation est une image RGB de l'écran de jeu de taille (1300, 800, 3). Les récompenses sont calculées ainsi : +1 pour chaque pas de temps où l'agent est en vie, -100 s'il touche un ennemi, +100 si l'agent réussi à survivre à un certain nombre de pas de temps. Chaque action est répété k fois, où k est un entier choisi de manière aléatoire entre 3 et 6. Notre but est de maximiser la récompense. <br />
 
 ## Optimisation de l'observation
-L'étape d'optimisation des données est primordial pour améliorer la vitesse de l'apprentissage. L'ensemble des pixels n'est pas nécessaire pour la compréhension de l'environnement c'est pourquoi nous avons fait les modifications suivantes (basé sur https://deepanshut041.github.io/Reinforcement-Learning/cgames/02_space_invader/) :
+L'étape d'optimisation des données est primordial pour améliorer la vitesse de l'apprentissage. L'ensemble des pixels n'est pas nécessaire pour la compréhension de l'environnement c'est pourquoi nous avons fait les modifications suivantes (basées sur https://deepanshut041.github.io/Reinforcement-Learning/cgames/02_space_invader/) :
 * Mettre l'image en niveau de gris (la couleur apporte peu d'informations)
 * Normaliser les valeurs des pixels (passage d'entiers allant de 0 à 255 en flottants allant de 0.0 à 1.0)
 * Réduire la taille de l'image en 100x100 au lieu de 1300x800
 * Empiler au moins 4 images pour avoir l'information de la vitesse et la direction des ennemis
 
 ## Compiler le projet sans l'IA
-Le jeu seul se trouve sur la branche main, après avoir cloné le projet, il faut se rendre sur cette branche.
+Le jeu seul se trouve sur la branche main. Après avoir cloné le projet, il faut se rendre sur cette branche.
 ```
 git checkout main
 ```
