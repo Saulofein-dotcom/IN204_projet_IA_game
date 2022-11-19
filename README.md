@@ -1,5 +1,9 @@
 # IN204 - Reinforcement Learning dans un jeu vidéo en C++
 
+**Reinforcement Learning** project using **Proximal Policy Optimization** where the agent plays a survival game made for this occasion. The game and the agent were both coded in C++ (using respectively SFML and LibTorch).
+
+This was the main assignment in course IN204 at ENSTA Paris (engineering school).
+
 ## Le jeu
 Vous contrôlez un joueur qui peut se déplacer suivant les quatres directions (HAUT, BAS, GAUCHE, DROITE). Avec votre souris vous pouvez diriger une épée et tirer pour tuer les ennemis bleus. Les roches qui tombent doivent être esquiver, on peut anticiper leur point d'impact grâce à leur ombre.<br />
 Si un rocher ou un ennemi bleu vous touche, la partie se termine et la fenêtre de jeu se ferme.<br />
